@@ -1,0 +1,608 @@
+@font-face {
+  font-family: Geist;
+  src: url('/fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('/fonts/GeistMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* The component's own colours, light and dark by the system's setting. */
+:root {
+  color-scheme: light dark;
+  --surface: light-dark(oklch(100% 0 0), oklch(17.5% 0 0));
+  --subtle: light-dark(oklch(93% 0 0), oklch(24.5% 0 0));
+  --sunken: light-dark(oklch(89.5% 0 0), oklch(21% 0 0));
+  --foreground: light-dark(oklch(22.7% 0.006 271.2), oklch(92.3% 0.004 286.3));
+  --secondary: light-dark(oklch(41.8% 0.014 274.6), oklch(78.2% 0.016 281.9));
+  --muted: light-dark(oklch(52% 0.044 267.6), oklch(67.3% 0.028 276.2));
+  --disabled: light-dark(oklch(72% 0.01 270), oklch(48% 0.01 280));
+  --success: light-dark(oklch(46% 0.185 145.3), oklch(84.4% 0.185 145.3));
+  --warning: light-dark(oklch(46% 0.191 32.2), oklch(71.2% 0.191 32.2));
+  --sans: Geist, ui-sans-serif, system-ui, sans-serif;
+  --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--surface);
+  color: var(--secondary);
+  font: 16px/24px var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+.page {
+  max-width: 832px;
+  margin: 0 auto;
+  padding: 0 16px 64px;
+}
+
+@media (min-width: 640px) {
+  .page {
+    padding: 0 32px 64px;
+  }
+}
+
+/* Header */
+
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 64px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--foreground);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.links {
+  display: flex;
+  gap: 20px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.links a {
+  text-decoration: none;
+}
+
+.links a:hover {
+  color: var(--foreground);
+}
+
+@media (max-width: 639px) {
+  .links .wide {
+    display: none;
+  }
+}
+
+/* Text */
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+h1 {
+  margin-bottom: 16px;
+  font-size: 32px;
+  line-height: 40px;
+  letter-spacing: -0.02em;
+}
+
+h2 {
+  margin-bottom: 12px;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.01em;
+}
+
+h3 {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+p {
+  max-width: 640px;
+  margin: 0 0 16px;
+}
+
+.lead {
+  margin-bottom: 32px;
+}
+
+/* A part's name, in a tab's type. */
+.label {
+  margin-bottom: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+:not(pre) > code {
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--subtle);
+  font: 14px/20px var(--mono);
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+.hero {
+  padding-top: 64px;
+}
+
+section {
+  margin-top: 112px;
+  scroll-margin-top: 32px;
+}
+
+.stack {
+  display: grid;
+  gap: 16px;
+}
+
+/* What it weighs and where it runs, under the first demo. */
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px 16px;
+  margin: 40px 0 0;
+}
+
+@media (min-width: 640px) {
+  .facts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.facts dt {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+/*
+ * Code and prompts on the sunken ground, with a tab cut into one corner and
+ * copy in the other, as in the component.
+ */
+.block {
+  --ground: var(--surface);
+  position: relative;
+  min-width: 0;
+  padding-top: 22px;
+  border-radius: 8px;
+  background: var(--sunken);
+}
+
+.block pre {
+  margin: 0;
+  padding: 16px;
+  overflow-x: auto;
+  color: light-dark(oklch(49% 0.04 268), oklch(67.3% 0.028 276.2));
+  font: 14px/24px var(--mono);
+  scrollbar-width: thin;
+}
+
+.block .prompt {
+  margin: 0;
+  padding: 12px 16px 16px;
+  color: var(--foreground);
+  font-size: 15px;
+  line-height: 24px;
+}
+
+.tab,
+.copy {
+  position: absolute;
+  top: 0;
+  display: flex;
+  align-items: center;
+  height: 24px;
+  background: var(--ground);
+}
+
+.tab {
+  left: 0;
+  padding: 0 8px;
+  border-bottom-right-radius: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.copy {
+  right: 0;
+  padding: 0 4px;
+  border-bottom-left-radius: 6px;
+}
+
+.tab::before,
+.tab::after,
+.copy::before,
+.copy::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(
+    circle at var(--at) 100%,
+    transparent 6px,
+    var(--ground) 6.5px
+  );
+}
+
+.tab {
+  --at: 100%;
+}
+
+.copy {
+  --at: 0;
+}
+
+.tab::before {
+  top: 0;
+  left: 100%;
+}
+
+.tab::after {
+  top: 100%;
+  left: 0;
+}
+
+.copy::before {
+  top: 0;
+  right: 100%;
+}
+
+.copy::after {
+  top: 100%;
+  right: 0;
+}
+
+.copy button {
+  all: unset;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.copy button:hover {
+  color: var(--foreground);
+}
+
+.copy button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.code-tag {
+  color: light-dark(oklch(46% 0.185 145.3), oklch(84.4% 0.185 145.3));
+}
+
+.code-attribute {
+  color: light-dark(oklch(46% 0.088 229.9), oklch(85.7% 0.088 229.9));
+}
+
+.code-string {
+  color: light-dark(oklch(46% 0.191 32.2), oklch(71.2% 0.191 32.2));
+}
+
+.code-keyword {
+  color: light-dark(oklch(46% 0.2 317.2), oklch(76.9% 0.2 317.2));
+}
+
+/* Setup, one block per client. */
+.clients {
+  display: grid;
+  gap: 16px;
+}
+
+/* The chat, as a host shows it. */
+.chat {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  outline: 1px solid var(--subtle);
+}
+
+.ask {
+  justify-self: end;
+  max-width: min(480px, 90%);
+  margin: 0;
+  padding: 8px 16px;
+  border-radius: 16px;
+  background: var(--subtle);
+  color: var(--foreground);
+}
+
+.answer {
+  margin: 0;
+}
+
+/* Ideas, two to a row once there is room. */
+.ideas {
+  display: grid;
+  gap: 40px 24px;
+  margin-top: 32px;
+}
+
+@media (min-width: 640px) {
+  .ideas {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.idea {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.idea p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+.idea .block {
+  margin-top: 8px;
+  flex-grow: 1;
+}
+
+/* Props */
+
+.table {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+th,
+td {
+  padding: 10px 16px 10px 0;
+  border-top: 1px solid var(--subtle);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+td:first-child {
+  white-space: nowrap;
+}
+
+/* Changelog */
+
+.release {
+  margin-top: 24px;
+}
+
+.release h3 {
+  display: flex;
+  gap: 12px;
+}
+
+.release h3 span {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.release h4 {
+  margin: 16px 0 4px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+}
+
+.release ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.release li {
+  max-width: 640px;
+  margin-bottom: 4px;
+}
+
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  margin-top: 112px;
+  padding-top: 24px;
+  border-top: 1px solid var(--subtle);
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 20px;
+}
+
+footer nav {
+  display: flex;
+  gap: 20px;
+}
+
+footer a {
+  text-decoration: none;
+}
+
+footer a:hover {
+  color: var(--foreground);
+}
+
+/* The demos' own components. */
+
+.button {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--radius);
+  font: 500 14px/20px var(--sans);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    opacity 0.15s;
+}
+
+.button[data-size='small'] {
+  height: 28px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.button[data-size='large'] {
+  height: 44px;
+  padding: 0 20px;
+  font-size: 16px;
+}
+
+.button[data-variant='primary'] {
+  background: var(--foreground);
+  color: var(--surface);
+}
+
+.button[data-variant='secondary'] {
+  background: var(--subtle);
+  color: var(--foreground);
+}
+
+.button[data-variant='ghost'] {
+  box-shadow: inset 0 0 0 1px var(--subtle);
+  color: var(--foreground);
+}
+
+.button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.button:focus-visible,
+.switch:focus-visible {
+  outline: 2px solid var(--muted);
+  outline-offset: 2px;
+}
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--foreground);
+  font: 14px/20px var(--sans);
+}
+
+.toggle[data-disabled] {
+  opacity: 0.4;
+}
+
+.switch {
+  all: unset;
+  position: relative;
+  width: 36px;
+  height: 20px;
+  border-radius: 10px;
+  background: var(--sunken);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.switch[aria-checked='true'] {
+  background: var(--success);
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 1px 2px oklch(0% 0 0 / 0.2);
+  transition: translate 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.switch[aria-checked='true']::after {
+  translate: 16px 0;
+}
+
+.switch:disabled {
+  cursor: default;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  color: var(--tone);
+  font: 500 13px/16px var(--sans);
+}
+
+.badge b {
+  min-width: 16px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--tone);
+  color: var(--surface);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}

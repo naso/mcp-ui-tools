@@ -1,0 +1,391 @@
+import { useEffect, useInsertionEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+
+import type { Control } from './controls';
+import type { Token } from './highlight';
+
+import css from './styles.css?inline';
+
+/** The stylesheet both entries share. */
+export const base: string = css;
+
+export type Value = string | number | boolean;
+
+/** Adds `css` to the page once, first, so the page's own styles win. */
+export function useStyles(id: string, css: string) {
+  useInsertionEffect(() => {
+    if (document.getElementById(id)) return;
+    const style = document.createElement('style');
+    style.id = id;
+    style.textContent = css;
+    document.head.prepend(style);
+  }, []);
+}
+
+/** Code without the blank lines around it or the indent its lines share. */
+export function dedent(code: string) {
+  const lines = code
+    .replace(/^\s*\n/, '')
+    .trimEnd()
+    .split('\n');
+  const indent = Math.min(
+    ...lines.filter((line) => line.trim()).map((line) => line.search(/\S/)),
+  );
+  return lines.map((line) => line.slice(indent)).join('\n');
+}
+
+const tint = (control: Control) =>
+  control.kind === 'boolean' || typeof control.value === 'number'
+    ? 'cc-box cc-keyword'
+    : control.quote
+      ? 'cc-box cc-string'
+      : 'cc-box';
+
+function Icon({ d }: { d: string }) {
+  return (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d={d} />
+    </svg>
+  );
+}
+
+const COPY = 'M8 7.5h7.5v8H8zM12 4.5H4.5v8';
+const CHECK = 'M5 10.5l3 3 7-7';
+const RESET = 'M5 8.5a5.5 5.5 0 1 1 .5 4.5M5 4.5v4h4';
+
+type Props = {
+  control: Control;
+  /** The value as the code writes it. */
+  written: string;
+  onChange: (value: Value) => void;
+};
+
+/** A number, dragged sideways or stepped with the arrow keys. Shift takes ten. */
+function Scrub({ control, onChange, written }: Props) {
+  const { min = -Infinity, max = Infinity, step } = control;
+  const value = control.value as number;
+  const from = useRef<{ x: number; value: number } | null>(null);
+  // A whole range takes `240px`, a step `2px` to `12px`; `6px` without one.
+  const width =
+    max - min < Infinity
+      ? Math.min(12, Math.max(2, (240 * step) / (max - min)))
+      : 6;
+  const set = (next: number) => {
+    next = Math.min(max, Math.max(min, next));
+    if (next !== value) onChange(next);
+  };
+  return (
+    <span
+      className={`${tint(control)} cc-scrub`}
+      role="slider"
+      tabIndex={0}
+      aria-label={control.prop}
+      aria-valuenow={value}
+      aria-valuemin={min > -Infinity ? min : undefined}
+      aria-valuemax={max < Infinity ? max : undefined}
+      onPointerDown={(event) => {
+        event.currentTarget.setPointerCapture(event.pointerId);
+        from.current = { x: event.clientX, value };
+      }}
+      onPointerMove={(event) => {
+        if (from.current) {
+          const steps = Math.round((event.clientX - from.current.x) / width);
+          set(from.current.value + steps * step);
+        }
+      }}
+      onPointerUp={() => (from.current = null)}
+      onPointerCancel={() => (from.current = null)}
+      onKeyDown={(event) => {
+        const by = event.shiftKey ? step * 10 : step;
+        const next = {
+          ArrowUp: value + by,
+          ArrowRight: value + by,
+          ArrowDown: value - by,
+          ArrowLeft: value - by,
+          Home: min,
+          End: max,
+        }[event.key];
+        if (next !== undefined && Number.isFinite(next)) {
+          event.preventDefault();
+          set(next);
+        }
+      }}
+    >
+      {written}
+    </span>
+  );
+}
+
+/** Text, typed over in place. Enter or Escape leaves it. */
+function Field({ control, onChange }: Props) {
+  const value = `${control.value}`;
+  const { quote } = control;
+  return (
+    <label className={tint(control)}>
+      {quote}
+      <span className="cc-field" data-value={value}>
+        <input
+          size={1}
+          value={value}
+          aria-label={control.prop}
+          spellCheck={false}
+          onChange={(event) => onChange(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === 'Escape') {
+              event.currentTarget.blur();
+            }
+          }}
+        />
+      </span>
+      {quote}
+    </label>
+  );
+}
+
+/** A value picked from a menu, which stays open to try the others. */
+function Options({ control, onChange, written }: Props) {
+  const menu = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const shown = (option: Value) => {
+    const quote = typeof option === 'string' ? control.quote : '';
+    return quote + option + quote;
+  };
+  const items = () => [...menu.current!.children] as HTMLElement[];
+
+  useEffect(() => {
+    const list = menu.current!;
+    const toggle = (event: Event) =>
+      setOpen((event as ToggleEvent).newState === 'open');
+    // A scroll would leave the menu behind its value.
+    const close = () => list.matches(':popover-open') && list.hidePopover();
+    list.addEventListener('toggle', toggle);
+    addEventListener('scroll', close, true);
+    return () => {
+      list.removeEventListener('toggle', toggle);
+      removeEventListener('scroll', close, true);
+    };
+  }, []);
+
+  return (
+    <>
+      <button
+        type="button"
+        className={tint(control)}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label={control.prop}
+        onClick={(event) => {
+          const list = menu.current!;
+          const { left, bottom } = event.currentTarget.getBoundingClientRect();
+          list.style.left = `${left}px`;
+          list.style.top = `${bottom + 4}px`;
+          list.showPopover();
+          items()
+            .find((item) => item.getAttribute('aria-checked') === 'true')
+            ?.focus();
+        }}
+      >
+        {written}
+      </button>
+      <div
+        ref={menu}
+        className="cc-menu"
+        popover="auto"
+        role="menu"
+        onKeyDown={(event) => {
+          const all = items();
+          const at = all.indexOf(document.activeElement as HTMLElement);
+          const by = { ArrowDown: 1, ArrowUp: -1 }[event.key];
+          if (by) {
+            event.preventDefault();
+            all[(at + by + all.length) % all.length].focus();
+          }
+        }}
+      >
+        {control.options!.map((option) => (
+          <button
+            key={`${option}`}
+            type="button"
+            role="menuitemradio"
+            aria-checked={option === control.value}
+            onClick={() => onChange(option)}
+          >
+            {shown(option)}
+          </button>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/** The code, coloured, with each control in place of its value. */
+function Code({
+  source,
+  tokens,
+  controls,
+  onChange,
+}: {
+  source: string;
+  tokens: Token[];
+  controls: Control[];
+  onChange: (control: Control, value: Value) => void;
+}) {
+  const nodes: ReactNode[] = [];
+  let at = 0;
+  let next = 0;
+
+  const plain = (end: number) => {
+    while (at < end) {
+      while (next < tokens.length && tokens[next].end <= at) next++;
+      const token = tokens[next];
+      if (token && token.start <= at) {
+        const stop = Math.min(token.end, end);
+        nodes.push(
+          <span key={at} className={`cc-${token.ink}`}>
+            {source.slice(at, stop)}
+          </span>,
+        );
+        at = stop;
+      } else {
+        const stop = Math.min(token?.start ?? end, end);
+        nodes.push(source.slice(at, stop));
+        at = stop;
+      }
+    }
+  };
+
+  controls.forEach((control, index) => {
+    plain(control.range.start);
+    const written = source.slice(control.range.start, control.range.end);
+    const props: Props = {
+      control,
+      written,
+      onChange: (value) => onChange(control, value),
+    };
+    nodes.push(
+      control.kind === 'boolean' ? (
+        <button
+          key={`c${index}`}
+          type="button"
+          className={tint(control)}
+          aria-label={control.prop}
+          aria-pressed={control.value as boolean}
+          onClick={() => props.onChange(!control.value)}
+        >
+          {written}
+        </button>
+      ) : control.kind === 'number' ? (
+        <Scrub key={`c${index}`} {...props} />
+      ) : control.kind === 'option' ? (
+        <Options key={`c${index}`} {...props} />
+      ) : (
+        <Field key={`c${index}`} {...props} />
+      ),
+    );
+    at = control.range.end;
+  });
+  plain(source.length);
+
+  return (
+    <div className="cc-body">
+      <div className="cc-lines" aria-hidden>
+        {source
+          .split('\n')
+          .map((_, line) => line + 1)
+          .join('\n')}
+      </div>
+      <div className="cc-scroll">
+        <code>{nodes}</code>
+      </div>
+    </div>
+  );
+}
+
+function Actions({
+  source,
+  changed,
+  onReset,
+}: {
+  source: string;
+  changed: boolean;
+  onReset: () => void;
+}) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <div className={`cc-tab cc-actions${changed ? ' cc-changed' : ''}`}>
+      <span className="cc-slot">
+        <button
+          type="button"
+          className="cc-action"
+          aria-label={copied ? 'Copied' : 'Copy code'}
+          onClick={() =>
+            navigator.clipboard.writeText(source).then(() => {
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1500);
+            })
+          }
+        >
+          <Icon d={copied ? CHECK : COPY} />
+        </button>
+      </span>
+      <span className="cc-slot">
+        <button
+          type="button"
+          className="cc-action"
+          aria-label="Reset code"
+          tabIndex={changed ? 0 : -1}
+          onClick={onReset}
+        >
+          <Icon d={RESET} />
+        </button>
+      </span>
+    </div>
+  );
+}
+
+/** The preview beside the code, with the code's tab, copy and reset. */
+export function Panel({
+  className,
+  theme,
+  preview,
+  tab,
+  source,
+  changed,
+  onReset,
+  ...code
+}: {
+  className?: string;
+  theme?: 'light' | 'dark';
+  preview: ReactNode;
+  tab: ReactNode;
+  source: string;
+  changed: boolean;
+  onReset: () => void;
+  tokens: Token[];
+  controls: Control[];
+  onChange: (control: Control, value: Value) => void;
+}) {
+  return (
+    <div className={className ? `cc ${className}` : 'cc'} data-theme={theme}>
+      <div className="cc-frame">
+        <div className="cc-preview">{preview}</div>
+        <div className="cc-code">
+          {tab}
+          <Actions source={source} changed={changed} onReset={onReset} />
+          <Code source={source} {...code} />
+        </div>
+      </div>
+      <div className="cc-tab">Preview</div>
+    </div>
+  );
+}

@@ -1,0 +1,52 @@
+/*
+ * The files' names in the code's tab, `2px` in. The open one sits on a pill
+ * of the code's ground. It outranks `.cc-tab`, which a page with both entries
+ * has twice.
+ */
+.cc .cc-files {
+  padding: 0 2px;
+  pointer-events: auto;
+}
+
+.cc-files > button {
+  all: unset;
+  display: flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cc-files > :hover {
+  color: var(--cc-secondary);
+}
+
+.cc-files > [aria-selected='true'] {
+  background: var(--cc-sunken);
+  color: var(--cc-foreground);
+}
+
+.cc-files > :focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+/* The page, as tall as what it shows. A run loads unseen behind the last. */
+.cc-run:not([hidden]) {
+  display: grid;
+  width: 100%;
+}
+
+.cc-run > iframe {
+  grid-area: 1 / 1;
+  width: 100%;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cc-run > [data-shown] {
+  opacity: 1;
+  pointer-events: auto;
+}

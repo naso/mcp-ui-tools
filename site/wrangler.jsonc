@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "component-code",
+  "compatibility_date": "2026-11-15",
+  // The site is static files, which are free. Only the MCP endpoint runs code.
+  "main": "../packages/mcp/src/worker.ts",
+  "assets": {
+    "directory": "./dist",
+    "run_worker_first": ["/mcp"],
+  },
+  "rules": [{ "type": "Text", "globs": ["**/*.html"], "fallthrough": true }],
+  "routes": [{ "pattern": "componentcode.fabio.cv", "custom_domain": true }],
+  "workers_dev": false,
+  "preview_urls": false,
+}

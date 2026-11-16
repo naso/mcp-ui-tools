@@ -1,0 +1,11 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "vite/client"],
+    "paths": {
+      "component-code": ["../packages/component-code/src/index.ts"],
+      "component-code/html": ["../packages/component-code/src/html/index.ts"]
+    }
+  },
+  "include": ["src", "scripts", "*.ts"]
+}

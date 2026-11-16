@@ -1,0 +1,392 @@
+/*
+ * Light and dark in one value each. The page's `color-scheme` picks one, and
+ * `theme` sets it.
+ */
+.cc {
+  --cc-surface: light-dark(oklch(100% 0 0), oklch(17.5% 0 0));
+  --cc-subtle: light-dark(oklch(93% 0 0), oklch(24.5% 0 0));
+  --cc-sunken: light-dark(oklch(89.5% 0 0), oklch(21% 0 0));
+  --cc-foreground: light-dark(
+    oklch(22.7% 0.006 271.2),
+    oklch(92.3% 0.004 286.3)
+  );
+  --cc-secondary: light-dark(
+    oklch(41.8% 0.014 274.6),
+    oklch(78.2% 0.016 281.9)
+  );
+  --cc-muted: light-dark(oklch(52% 0.044 267.6), oklch(67.3% 0.028 276.2));
+  --cc-disabled: light-dark(oklch(72% 0.01 270), oklch(48% 0.01 280));
+  --cc-text: light-dark(oklch(49% 0.04 268), oklch(67.3% 0.028 276.2));
+  --cc-line: light-dark(oklch(59% 0.02 270), oklch(51% 0.02 276));
+  --cc-tag: light-dark(oklch(46% 0.185 145.3), oklch(84.4% 0.185 145.3));
+  --cc-attribute: light-dark(oklch(46% 0.088 229.9), oklch(85.7% 0.088 229.9));
+  --cc-string: light-dark(oklch(46% 0.191 32.2), oklch(71.2% 0.191 32.2));
+  --cc-keyword: light-dark(oklch(46% 0.2 317.2), oklch(76.9% 0.2 317.2));
+  --cc-sans: Geist, ui-sans-serif, system-ui, sans-serif;
+  --cc-mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --cc-ease: 0.24s cubic-bezier(0.2, 0.9, 0.3, 1);
+  --copy: 0;
+  --reset: 0;
+
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
+  container-type: inline-size;
+  border-radius: 8px;
+  outline: 1px solid var(--cc-subtle);
+  background: var(--cc-subtle);
+  color: var(--cc-foreground);
+  font: 16px/24px var(--cc-sans);
+  text-align: left;
+  -webkit-font-smoothing: antialiased;
+}
+
+.cc[data-theme='light'] {
+  color-scheme: light;
+}
+
+.cc[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+.cc *,
+.cc *::before,
+.cc *::after {
+  box-sizing: inherit;
+}
+
+/* The preview above its code, and beside it in equal halves once there is room. */
+.cc-frame {
+  display: grid;
+  gap: 2px;
+  padding: 2px;
+  background: var(--cc-surface);
+}
+
+@container (min-width: 640px) {
+  .cc-frame {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* The component on the frame's surface, a tab's height down. */
+.cc-preview {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  padding: 48px 24px 24px;
+}
+
+.cc-problem {
+  margin: 0;
+  color: var(--cc-muted);
+  font: 14px/20px var(--cc-sans);
+  text-align: center;
+}
+
+/*
+ * A tab cut into the corner of what it belongs to, showing `--ground`, with
+ * `6px` fillets where the cut meets the edges `--inset` in.
+ */
+.cc-tab {
+  --inset: 0px;
+  position: absolute;
+  top: calc(var(--inset) * -1);
+  left: calc(var(--inset) * -1);
+  display: flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 8px;
+  border-bottom-right-radius: 6px;
+  background: var(--ground);
+  color: var(--cc-muted);
+  font: 12px/16px var(--cc-sans);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.cc-tab::before,
+.cc-tab::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(
+    circle at 100% 100%,
+    transparent 6px,
+    var(--ground) 6.5px
+  );
+}
+
+.cc-tab::before {
+  top: var(--inset);
+  left: 100%;
+}
+
+.cc-tab::after {
+  top: 100%;
+  left: var(--inset);
+}
+
+.cc > .cc-tab {
+  --ground: var(--cc-subtle);
+}
+
+/* The code on its sunken ground, below its tab. */
+.cc-code {
+  --ground: var(--cc-surface);
+  --tint: var(--cc-text);
+  position: relative;
+  min-width: 0;
+  padding-top: 22px;
+  border-radius: 6px;
+  background: var(--cc-sunken);
+  color: var(--cc-text);
+  font: 14px/24px var(--cc-mono);
+}
+
+.cc-code > .cc-tab {
+  --inset: 2px;
+}
+
+.cc-body {
+  display: flex;
+}
+
+/* Line numbers stay put while a long line scrolls. */
+.cc-lines {
+  flex-shrink: 0;
+  padding: 16px 4px 16px 16px;
+  color: var(--cc-line);
+  text-align: right;
+  white-space: pre;
+  user-select: none;
+}
+
+.cc-scroll {
+  flex-grow: 1;
+  min-width: 0;
+  padding: 16px 16px 16px 4px;
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cc-disabled) transparent;
+}
+
+/* Unset first, as pages often style their `code`. */
+.cc .cc-scroll > code {
+  all: unset;
+  display: block;
+  width: max-content;
+  min-width: 100%;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.cc-tag {
+  color: var(--cc-tag);
+}
+
+.cc-attribute {
+  color: var(--cc-attribute);
+}
+
+.cc-string {
+  --tint: var(--cc-string);
+  color: var(--cc-string);
+}
+
+.cc-keyword {
+  --tint: var(--cc-keyword);
+  color: var(--cc-keyword);
+}
+
+/*
+ * A value the reader can change, in a box of its colour at `14%`, `4px` past
+ * its text. It deepens to `28%` while in use.
+ */
+.cc-box {
+  all: unset;
+  display: inline-block;
+  margin: 0 -2px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--tint) 14%, transparent);
+  line-height: 20px;
+  white-space: pre;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cc-box:hover,
+.cc-box:focus-within,
+.cc-box[aria-expanded='true'] {
+  background: color-mix(in srgb, var(--tint) 28%, transparent);
+}
+
+.cc-box:focus-visible,
+.cc-action:focus-visible,
+.cc-menu > button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+/* A number, dragged sideways. A touch still scrolls the page. */
+.cc-scrub {
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+
+/* Text, typed in place, as wide as what it holds. */
+.cc-field {
+  display: inline-grid;
+  min-width: 8px;
+  cursor: text;
+}
+
+.cc-field::after {
+  content: attr(data-value);
+  grid-area: 1 / 1;
+  visibility: hidden;
+  white-space: pre;
+}
+
+.cc-field > input {
+  all: unset;
+  grid-area: 1 / 1;
+  width: 100%;
+  min-width: 0;
+}
+
+/* Options, under their value, on top of everything. */
+.cc-menu {
+  position: fixed;
+  inset: auto;
+  display: none;
+  min-width: 96px;
+  margin: 0;
+  padding: 2px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--cc-subtle);
+  color: var(--cc-secondary);
+  font: 14px/20px var(--cc-mono);
+  box-shadow: 0 8px 24px oklch(0% 0 0 / 0.12);
+}
+
+.cc-menu:popover-open {
+  display: grid;
+}
+
+.cc-menu > button {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 6px;
+  white-space: pre;
+  cursor: pointer;
+}
+
+.cc-menu > button:is(:hover, :focus) {
+  background: var(--cc-sunken);
+  color: var(--cc-foreground);
+}
+
+.cc-menu > [aria-checked='true']::after {
+  content: '✓';
+  margin-left: auto;
+  color: var(--cc-muted);
+}
+
+/*
+ * Copy and reset in the code's top-right corner. Reset holds the corner once
+ * the code has changed; copy shows beside it while the code is hovered or
+ * focused, and always where nothing can hover. `--copy` and `--reset` are `1`
+ * while each shows.
+ */
+.cc-code:is(:hover, :has(:focus-visible)) {
+  --copy: 1;
+}
+
+@media (hover: none) {
+  .cc-code {
+    --copy: 1;
+  }
+}
+
+.cc-changed {
+  --reset: 1;
+}
+
+.cc-actions {
+  --open: max(var(--copy), var(--reset));
+  top: -2px;
+  right: -2px;
+  left: auto;
+  padding: 0 calc(var(--open) * 4px) 0 0;
+  border-radius: 0 0 0 6px;
+  pointer-events: auto;
+  transition: padding var(--cc-ease);
+}
+
+.cc-actions::before,
+.cc-actions::after {
+  left: auto;
+  background: radial-gradient(
+    circle at 0 100%,
+    transparent 6px,
+    var(--ground) 6.5px
+  );
+  opacity: var(--open);
+  transition: opacity var(--cc-ease);
+}
+
+.cc-actions::before {
+  right: 100%;
+}
+
+.cc-actions::after {
+  right: var(--inset);
+}
+
+/* Each action's room opens as it shows, and its icon slides in. */
+.cc-slot {
+  --shown: var(--copy);
+  display: flex;
+  justify-content: flex-end;
+  width: calc(var(--shown) * 24px);
+  overflow: hidden;
+  transition: width var(--cc-ease);
+}
+
+.cc-slot + .cc-slot {
+  --shown: var(--reset);
+}
+
+.cc-action {
+  all: unset;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  color: var(--cc-muted);
+  cursor: pointer;
+  transform: translateX(calc((1 - var(--shown)) * 24px));
+  transition: transform var(--cc-ease);
+}
+
+.cc-action:hover {
+  color: var(--cc-foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cc * {
+    transition: none !important;
+  }
+}

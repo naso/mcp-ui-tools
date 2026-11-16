@@ -1,0 +1,60 @@
+{
+  "name": "component-code",
+  "version": "0.1.0",
+  "description": "A React component beside the code that makes it, with every value in the code a control.",
+  "keywords": [
+    "react",
+    "component",
+    "preview",
+    "playground",
+    "live code",
+    "documentation",
+    "storybook",
+    "mdx"
+  ],
+  "license": "MIT",
+  "author": "Fabio Azevedo (https://fabio.cv)",
+  "homepage": "https://componentcode.fabio.cv",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naso/component-code.git",
+    "directory": "packages/component-code"
+  },
+  "bugs": "https://github.com/naso/component-code/issues",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./html": {
+      "types": "./dist/html/index.d.ts",
+      "default": "./dist/html.js"
+    }
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts"
+  ],
+  "scripts": {
+    "build": "node scripts/build.js && tsc -p tsconfig.build.json",
+    "test": "vitest run",
+    "check-types": "tsc --noEmit",
+    "prepublishOnly": "pnpm build && pnpm test"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "esbuild": "0.28.1",
+    "jsdom": "26.1.0",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "typescript": "6.0.3",
+    "vitest": "4.1.10"
+  }
+}

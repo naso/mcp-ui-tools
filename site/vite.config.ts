@@ -1,0 +1,20 @@
+import path from 'node:path';
+import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  build: {
+    // Browsers with `light-dark()`, so it is kept rather than emulated.
+    cssTarget: ['chrome123', 'safari17.5', 'firefox120'],
+  },
+  resolve: {
+    alias: {
+      // The source, so `component-code/html` resolves too.
+      'component-code': path.resolve(
+        import.meta.dirname,
+        '../packages/component-code/src',
+      ),
+    },
+  },
+  plugins: [react()],
+});

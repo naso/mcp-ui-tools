@@ -1,0 +1,20 @@
+{
+  "name": "component-code-repo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "pnpm --filter component-code build && pnpm --filter component-code-mcp build && pnpm --filter site build",
+    "dev": "pnpm --filter site dev",
+    "test": "pnpm -r test",
+    "check-types": "pnpm -r check-types",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "3.9.5",
+    "typescript": "6.0.3"
+  },
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=24"
+  }
+}

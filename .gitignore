@@ -1,0 +1,11 @@
+node_modules
+dist
+*.log
+.DS_Store
+*.tsbuildinfo
+
+# Wrangler's local state
+.wrangler
+
+# Machine-specific preview settings for the Claude desktop app
+.claude/launch.json

@@ -1,0 +1,24 @@
+{
+  "name": "site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "predev": "pnpm --filter component-code build",
+    "dev": "vite",
+    "build": "vite build && vite build --ssr src/server.tsx --outDir dist-server && node scripts/prerender.js",
+    "check-types": "tsc --noEmit",
+    "deploy": "pnpm --dir .. build && wrangler deploy"
+  },
+  "devDependencies": {
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.3",
+    "component-code": "workspace:*",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "typescript": "6.0.3",
+    "vite": "8.1.4",
+    "wrangler": "4.162.0"
+  }
+}
