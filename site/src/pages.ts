@@ -3,7 +3,7 @@ import type { ComponentType } from 'react';
 import { ComponentCodeLogo, HomeLogo, OrbitLogo } from './logos';
 
 export const SITE = 'https://mcp-ui-tools.fabio.cv';
-export const GITHUB = 'https://github.com/naso/component-code';
+export const GITHUB = 'https://github.com/naso/mcp-ui-tools';
 
 export type PageId = 'home' | 'component-code' | 'orbit';
 

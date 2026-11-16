@@ -18,10 +18,10 @@
   "homepage": "https://mcp-ui-tools.fabio.cv",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/naso/component-code.git",
+    "url": "git+https://github.com/naso/mcp-ui-tools.git",
     "directory": "tools/mcp-ui-tools"
   },
-  "bugs": "https://github.com/naso/component-code/issues",
+  "bugs": "https://github.com/naso/mcp-ui-tools/issues",
   "type": "module",
   "bin": {
     "mcp-ui-tools": "./dist/stdio.js"
