@@ -37,6 +37,9 @@
     "dist/**/*.js",
     "dist/**/*.d.ts"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "node scripts/build.js && tsc -p tsconfig.build.json",
     "test": "vitest run",
