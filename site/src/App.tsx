@@ -6,6 +6,7 @@ import { Code, Prompt } from './blocks';
 import { Changelog } from './changelog';
 import { Badge, Button, Toggle } from './demos';
 import { WAVES, WAVES_CONTROLS } from './waves';
+import { Why } from './why';
 
 const SITE = 'https://componentcode.fabio.cv';
 const GITHUB = 'https://github.com/naso/component-code';
@@ -171,7 +172,6 @@ export function App() {
 
       <main>
         <div className="hero">
-          <h1>Component Code</h1>
           <p className="lead">
             A component beside the code that makes it, where every value is a
             control. Drag a number, switch a boolean, type over the text. Ask
@@ -216,6 +216,8 @@ export function App() {
             </div>
           </dl>
         </div>
+
+        <Why />
 
         <section id="mcp">
           <div className="label">MCP</div>

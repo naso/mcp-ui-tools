@@ -103,19 +103,11 @@ a {
 
 /* Text */
 
-h1,
 h2,
 h3 {
   margin: 0;
   color: var(--foreground);
   font-weight: 500;
-}
-
-h1 {
-  margin-bottom: 16px;
-  font-size: 32px;
-  line-height: 40px;
-  letter-spacing: -0.02em;
 }
 
 h2 {
@@ -388,6 +380,199 @@ section {
 .idea .block {
   margin-top: 8px;
   flex-grow: 1;
+}
+
+/*
+ * Why, a card each, scrolled sideways: three in the page's column, and the
+ * rest past it out to the window's edges, smaller, dimmer and stacked the
+ * further out they are. A card is never narrower than a third of the widest
+ * column, so a narrower page shows fewer. `--left` and `--right` are the gaps
+ * to those edges, which the page measures.
+ */
+
+.reasons-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.reasons-head .label {
+  margin: 0;
+}
+
+.arrows {
+  display: flex;
+  gap: 4px;
+}
+
+.arrows button {
+  all: unset;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.arrows button:hover {
+  color: var(--foreground);
+}
+
+.arrows button:disabled {
+  color: var(--disabled);
+  cursor: default;
+}
+
+.arrows button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.reasons {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max((100% - 32px) / 3, 245px);
+  gap: 16px;
+  margin: 0 calc(var(--right, 0px) * -1) 0 calc(var(--left, 0px) * -1);
+  padding: 0 var(--right, 0px) 0 var(--left, 0px);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: var(--left, 0px) var(--right, 0px);
+  scrollbar-width: none;
+  list-style: none;
+  /* The cards' offsets are measured from here, and they stack within it. */
+  position: relative;
+  isolation: isolate;
+}
+
+/*
+ * Each card in a slot of its own, which snaps by its untouched box while the
+ * card changes past the column.
+ */
+.reasons > li {
+  display: flex;
+  scroll-snap-align: start;
+}
+
+/*
+ * The diagram to the card's edges, as the component fills its frame, then its
+ * headline and description on the card's ground. `1px` of the ground edges
+ * the diagram, so a white one still has an edge on a white page.
+ */
+.reason {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  padding: 1px 1px 16px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--subtle);
+}
+
+/*
+ * Past the column, a veil of the page's colour dims the card by `--dim`. The
+ * card stays opaque, so the cards it stacks over do not show through.
+ */
+.reason::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--surface);
+  opacity: var(--dim, 0);
+  pointer-events: none;
+}
+
+/* A headline of one line and a description of two at most. */
+.reasons h3 {
+  overflow: hidden;
+  margin: 12px 12px 4px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.reasons p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 20px;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* The component's own shapes and colours, drawn small. */
+.diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  /* The card's `8px` corner less its `1px` edge. */
+  border-radius: 7px;
+}
+
+.diagram .surface {
+  fill: var(--surface);
+}
+
+.diagram .subtle {
+  fill: var(--subtle);
+}
+
+.diagram .sunken {
+  fill: var(--sunken);
+}
+
+.diagram .text {
+  fill: var(--disabled);
+}
+
+.diagram .ink {
+  fill: var(--foreground);
+}
+
+.diagram :is(.code-tag, .code-attribute, .code-string, .code-keyword) {
+  fill: currentColor;
+}
+
+.diagram .box {
+  fill-opacity: 0.14;
+}
+
+.diagram .active {
+  fill-opacity: 0.28;
+}
+
+.diagram .ghost {
+  fill: none;
+  stroke: var(--foreground);
+  stroke-opacity: 0.35;
+  stroke-dasharray: 3 3;
+}
+
+.diagram .menu {
+  filter: drop-shadow(0 4px 8px oklch(0% 0 0 / 0.12));
+}
+
+.diagram .check {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.diagram .cursor {
+  fill: var(--foreground);
+  stroke: var(--surface);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  paint-order: stroke;
 }
 
 /* Props */
