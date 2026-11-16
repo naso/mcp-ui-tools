@@ -1,6 +1,6 @@
 {
   "name": "@fabiocv/orbit-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Orbit as an MCP App: a one-button game in the chat to play while the agent works.",
   "keywords": [
     "mcp",

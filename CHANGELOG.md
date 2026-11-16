@@ -2,7 +2,25 @@
 
 Every package shares a version. Each release lists what changed in each.
 
-## 0.1.0 – Unreleased
+## 0.1.1 – 2026-11-16
+
+### @fabiocv/component-code
+
+- Links to its repository, github.com/naso/mcp-ui-tools.
+
+### @fabiocv/component-code-mcp
+
+- Links to its repository, github.com/naso/mcp-ui-tools.
+
+### @fabiocv/orbit-mcp
+
+- Links to its repository, github.com/naso/mcp-ui-tools.
+
+### mcp-ui-tools
+
+- Links to its repository, github.com/naso/mcp-ui-tools.
+
+## 0.1.0 – 2026-11-16
 
 ### @fabiocv/component-code
 

@@ -1,6 +1,6 @@
 {
   "name": "mcp-ui-tools",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP Apps that show UI in the chat: Component Code, and Orbit, a game to play while the agent works. One server with every tool.",
   "keywords": [
     "mcp",
