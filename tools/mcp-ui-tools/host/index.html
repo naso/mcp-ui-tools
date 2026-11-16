@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Component Code host</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        background: #f4f4f4;
+        color: #111;
+      }
+      body.dark {
+        background: #161616;
+        color: #eee;
+      }
+      form {
+        display: grid;
+        gap: 8px;
+        max-width: 960px;
+        margin-bottom: 16px;
+      }
+      textarea {
+        font:
+          13px/1.4 ui-monospace,
+          monospace;
+      }
+      pre {
+        max-width: 960px;
+        white-space: pre-wrap;
+        font:
+          13px/1.4 ui-monospace,
+          monospace;
+      }
+      iframe {
+        display: block;
+        width: 100%;
+        max-width: 960px;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <form id="input">
+      <label>source <textarea name="source" rows="14"></textarea></label>
+      <label>code <textarea name="code" rows="5"></textarea></label>
+      <label>file <input name="file" /></label>
+      <div>
+        <button type="submit">Send</button>
+        <button type="button" id="page">Send a page</button>
+        <button type="button" id="theme">Theme</button>
+      </div>
+    </form>
+    <iframe id="view" sandbox="allow-scripts" title="Preview"></iframe>
+    <h2>Model context</h2>
+    <pre id="context">(none)</pre>
+    <script type="module" src="./host.ts"></script>
+  </body>
+</html>

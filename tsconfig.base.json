@@ -14,8 +14,8 @@
     "skipLibCheck": true,
     "noEmit": true,
     "paths": {
-      "component-code": ["./packages/component-code/src/index.ts"],
-      "component-code/html": ["./packages/component-code/src/html/index.ts"]
+      "@fabiocv/component-code": ["./packages/component-code/src/index.ts"],
+      "@fabiocv/component-code/html": ["./packages/component-code/src/html/index.ts"]
     }
   }
 }

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .ground { fill: #a2a4ab }
+    .preview { fill: #fff }
+    .code { fill: #ececec }
+    @media (prefers-color-scheme: dark) {
+      .ground { fill: #5c5d63 }
+      .preview { fill: #121212 }
+      .code { fill: #2a2a2a }
+    }
+  </style>
+  <rect class="ground" width="32" height="32" rx="8" />
+  <rect class="preview" x="2" y="2" width="13" height="28" rx="6" />
+  <rect class="code" x="17" y="2" width="13" height="28" rx="6" />
+</svg>

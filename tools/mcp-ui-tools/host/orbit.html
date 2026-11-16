@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Orbit host</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 16px;
+        font:
+          14px/1.5 system-ui,
+          sans-serif;
+        background: #f4f4f4;
+        color: #111;
+      }
+      body.dark {
+        background: #161616;
+        color: #eee;
+      }
+      iframe {
+        display: block;
+        width: 100%;
+        max-width: 720px;
+        border: 0;
+        margin-top: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <button type="button" id="theme">Theme</button>
+    <iframe id="view" sandbox="allow-scripts" title="Orbit"></iframe>
+    <script type="module" src="./orbit.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,63 @@
+{
+  "name": "@fabiocv/component-code-mcp",
+  "version": "0.1.0",
+  "description": "Component Code as an MCP App: a React component shown in the chat beside the code that uses it, with every value a control.",
+  "keywords": [
+    "mcp",
+    "mcp-app",
+    "mcp-ui-tools",
+    "react",
+    "component",
+    "preview",
+    "claude",
+    "chatgpt"
+  ],
+  "license": "MIT",
+  "author": "Fabio Azevedo (https://fabio.cv)",
+  "homepage": "https://mcp-ui-tools.fabio.cv/component-code/",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naso/component-code.git",
+    "directory": "tools/component-code"
+  },
+  "bugs": "https://github.com/naso/component-code/issues",
+  "type": "module",
+  "bin": {
+    "component-code-mcp": "./dist/stdio.js"
+  },
+  "files": [
+    "dist/stdio.js"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "vite build && node ../core/bundle.js",
+    "start": "node dist/stdio.js",
+    "test": "node --test test/*.test.js",
+    "check-types": "tsc --noEmit",
+    "prepublishOnly": "pnpm build && pnpm test"
+  },
+  "devDependencies": {
+    "@fabiocv/mcp-ui-tools-core": "workspace:*",
+    "@modelcontextprotocol/client": "2.4.0",
+    "@modelcontextprotocol/ext-apps": "2.0.4",
+    "@modelcontextprotocol/server": "2.4.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/react-dom": "19.2.3",
+    "@vitejs/plugin-react": "6.0.3",
+    "@fabiocv/component-code": "workspace:*",
+    "esbuild": "0.28.1",
+    "react": "19.2.7",
+    "react-dom": "19.2.7",
+    "sucrase": "3.35.1",
+    "typescript": "6.0.3",
+    "vite": "8.1.4",
+    "vite-plugin-singlefile": "2.3.4",
+    "zod": "4.6.7"
+  }
+}

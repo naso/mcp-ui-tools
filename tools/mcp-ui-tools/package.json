@@ -1,0 +1,53 @@
+{
+  "name": "mcp-ui-tools",
+  "version": "0.1.0",
+  "description": "MCP Apps that show UI in the chat: Component Code, and Orbit, a game to play while the agent works. One server with every tool.",
+  "keywords": [
+    "mcp",
+    "mcp-app",
+    "mcp-ui-tools",
+    "react",
+    "component",
+    "preview",
+    "game",
+    "claude",
+    "chatgpt"
+  ],
+  "license": "MIT",
+  "author": "Fabio Azevedo (https://fabio.cv)",
+  "homepage": "https://mcp-ui-tools.fabio.cv",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naso/component-code.git",
+    "directory": "tools/mcp-ui-tools"
+  },
+  "bugs": "https://github.com/naso/component-code/issues",
+  "type": "module",
+  "bin": {
+    "mcp-ui-tools": "./dist/stdio.js"
+  },
+  "files": [
+    "dist/stdio.js"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node ../core/bundle.js",
+    "start": "node dist/stdio.js",
+    "host": "vite --config vite.host.config.ts",
+    "test": "node --test test/*.test.js",
+    "check-types": "tsc --noEmit",
+    "prepublishOnly": "pnpm build && pnpm test"
+  },
+  "devDependencies": {
+    "@fabiocv/component-code-mcp": "workspace:*",
+    "@fabiocv/mcp-ui-tools-core": "workspace:*",
+    "@fabiocv/orbit-mcp": "workspace:*",
+    "@modelcontextprotocol/ext-apps": "2.0.4",
+    "@modelcontextprotocol/server": "2.4.0",
+    "@types/node": "26.1.1",
+    "typescript": "6.0.3",
+    "vite": "8.1.4"
+  }
+}

@@ -35,6 +35,8 @@ export type ComponentCodeProps = {
   file?: string;
   /** Sets light or dark. Without it, the page's `color-scheme` decides. */
   theme?: 'light' | 'dark';
+  /** A line from an info icon beside reset, once the reader changes a value. */
+  note?: string;
   className?: string;
 } & (
   | {
@@ -99,6 +101,7 @@ export function ComponentCode({
   code,
   file = 'Code',
   theme,
+  note,
   className,
   scope,
   interactive,
@@ -154,6 +157,7 @@ export function ComponentCode({
       tab={<div className="cc-tab">{file}</div>}
       source={source}
       changed={source !== written}
+      note={note}
       onReset={() => setEdited({ from: written, to: written })}
       tokens={tokens}
       controls={controls}

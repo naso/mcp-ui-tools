@@ -9,8 +9,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // The source, so `component-code/html` resolves too.
-      'component-code': path.resolve(
+      // The source, so `@fabiocv/component-code/html` resolves too.
+      '@fabiocv/component-code': path.resolve(
         import.meta.dirname,
         '../packages/component-code/src',
       ),

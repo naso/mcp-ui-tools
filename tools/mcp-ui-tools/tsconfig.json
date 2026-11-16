@@ -1,0 +1,7 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "vite/client"]
+  },
+  "include": ["src", "host", "*.ts", "../core/src/env.d.ts"]
+}

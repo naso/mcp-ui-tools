@@ -268,15 +268,21 @@
   margin: 0;
   padding: 2px;
   border: 0;
+  font: 14px/20px var(--cc-mono);
+}
+
+/* The menu and the note float the same way. */
+.cc-menu,
+.cc-code::after {
   border-radius: 8px;
   background: var(--cc-subtle);
   color: var(--cc-secondary);
-  font: 14px/20px var(--cc-mono);
   box-shadow: 0 8px 24px oklch(0% 0 0 / 0.12);
 }
 
 .cc-menu:popover-open {
   display: grid;
+  gap: 2px;
 }
 
 .cc-menu > button {
@@ -353,7 +359,10 @@
   right: var(--inset);
 }
 
-/* Each action's room opens as it shows, and its icon slides in. */
+/*
+ * Each action's room opens as it shows, and its icon slides in. The note
+ * shows with reset, once the code has changed.
+ */
 .cc-slot {
   --shown: var(--copy);
   display: flex;
@@ -363,7 +372,8 @@
   transition: width var(--cc-ease);
 }
 
-.cc-slot + .cc-slot {
+.cc-note,
+.cc-reset {
   --shown: var(--reset);
 }
 
@@ -383,6 +393,24 @@
 
 .cc-action:hover {
   color: var(--cc-foreground);
+}
+
+/* The note under the corner while its icon is hovered, focused or tapped. */
+.cc-code::after {
+  content: attr(data-note);
+  position: absolute;
+  top: 26px;
+  right: 4px;
+  padding: 4px 8px;
+  font: 12px/16px var(--cc-sans);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--cc-ease);
+  pointer-events: none;
+}
+
+.cc-code:has(.cc-note :is(:hover, :focus))::after {
+  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

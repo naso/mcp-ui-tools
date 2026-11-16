@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "pnpm --filter component-code build && pnpm --filter component-code-mcp build && pnpm --filter site build",
+    "build": "pnpm --filter @fabiocv/component-code build && pnpm --filter \"./tools/*\" build && pnpm --filter site build",
     "dev": "pnpm --filter site dev",
     "test": "pnpm -r test",
     "check-types": "pnpm -r check-types",

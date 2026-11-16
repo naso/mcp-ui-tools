@@ -42,6 +42,8 @@ export type ComponentCodeProps = {
   onChange?: (change: ComponentCodeChange) => void;
   /** Sets light or dark. Without it, the page's `color-scheme` decides. */
   theme?: 'light' | 'dark';
+  /** A line from an info icon beside reset, once the reader changes a value. */
+  note?: string;
   className?: string;
 };
 
@@ -116,6 +118,7 @@ export function ComponentCode({
   controls: options = {},
   onChange,
   theme,
+  note,
   className,
 }: ComponentCodeProps) {
   useStyles('component-code-html', styles);
@@ -167,6 +170,7 @@ export function ComponentCode({
       }
       source={sources[file]}
       changed={names.some((name) => sources[name] !== written[name])}
+      note={note}
       onReset={() => setEdited({ from: written, to: written })}
       tokens={tokens}
       controls={controls}

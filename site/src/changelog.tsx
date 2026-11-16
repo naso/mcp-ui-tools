@@ -38,23 +38,33 @@ const inline = (text: string): ReactNode[] =>
       index % 2 ? <code key={index}>{piece}</code> : piece,
     );
 
-export function Changelog() {
-  return read(changelog).map(({ version, date, parts }) => (
-    <div className="release" key={version}>
-      <h3>
-        {version}
-        <span>{date}</span>
-      </h3>
-      {parts.map(({ name, items }) => (
-        <div key={name}>
-          <h4>{name}</h4>
-          <ul>
-            {items.map((item) => (
-              <li key={item}>{inline(item)}</li>
-            ))}
-          </ul>
-        </div>
-      ))}
-    </div>
-  ));
+/**
+ * The releases, with only the sections for `packages` when it is given. A
+ * release with none of them is left out.
+ */
+export function Changelog({ packages }: { packages?: string[] }) {
+  return read(changelog).map(({ version, date, parts }) => {
+    const shown = parts.filter(
+      ({ name }) => !packages || packages.includes(name),
+    );
+    if (!shown.length) return null;
+    return (
+      <div className="release" key={version}>
+        <h3>
+          {version}
+          <span>{date}</span>
+        </h3>
+        {shown.map(({ name, items }) => (
+          <div key={name}>
+            <h4>{name}</h4>
+            <ul>
+              {items.map((item) => (
+                <li key={item}>{inline(item)}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    );
+  });
 }

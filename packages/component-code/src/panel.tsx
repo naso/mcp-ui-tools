@@ -62,6 +62,7 @@ function Icon({ d }: { d: string }) {
 const COPY = 'M8 7.5h7.5v8H8zM12 4.5H4.5v8';
 const CHECK = 'M5 10.5l3 3 7-7';
 const RESET = 'M5 8.5a5.5 5.5 0 1 1 .5 4.5M5 4.5v4h4';
+const INFO = 'M16 10a6 6 0 1 1-12 0a6 6 0 0 1 12 0M10 9.5V13m0-6v.01';
 
 type Props = {
   control: Control;
@@ -314,15 +315,29 @@ function Code({
 function Actions({
   source,
   changed,
+  note,
   onReset,
 }: {
   source: string;
   changed: boolean;
+  note?: string;
   onReset: () => void;
 }) {
   const [copied, setCopied] = useState(false);
   return (
     <div className={`cc-tab cc-actions${changed ? ' cc-changed' : ''}`}>
+      {note && (
+        <span className="cc-slot cc-note">
+          <button
+            type="button"
+            className="cc-action"
+            aria-label={note}
+            tabIndex={changed ? 0 : -1}
+          >
+            <Icon d={INFO} />
+          </button>
+        </span>
+      )}
       <span className="cc-slot">
         <button
           type="button"
@@ -338,7 +353,7 @@ function Actions({
           <Icon d={copied ? CHECK : COPY} />
         </button>
       </span>
-      <span className="cc-slot">
+      <span className="cc-slot cc-reset">
         <button
           type="button"
           className="cc-action"
@@ -361,6 +376,7 @@ export function Panel({
   tab,
   source,
   changed,
+  note,
   onReset,
   ...code
 }: {
@@ -370,6 +386,7 @@ export function Panel({
   tab: ReactNode;
   source: string;
   changed: boolean;
+  note?: string;
   onReset: () => void;
   tokens: Token[];
   controls: Control[];
@@ -379,9 +396,14 @@ export function Panel({
     <div className={className ? `cc ${className}` : 'cc'} data-theme={theme}>
       <div className="cc-frame">
         <div className="cc-preview">{preview}</div>
-        <div className="cc-code">
+        <div className="cc-code" data-note={note}>
           {tab}
-          <Actions source={source} changed={changed} onReset={onReset} />
+          <Actions
+            source={source}
+            changed={changed}
+            note={note}
+            onReset={onReset}
+          />
           <Code source={source} {...code} />
         </div>
       </div>

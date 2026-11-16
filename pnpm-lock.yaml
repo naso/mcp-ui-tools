@@ -42,8 +42,50 @@ importers:
         specifier: 4.1.10
         version: 4.1.10(@types/node@26.1.1)(jsdom@26.1.0)(vite@8.3.8(@types/node@26.1.1)(esbuild@0.28.1))
 
-  packages/mcp:
+  site:
     devDependencies:
+      '@fabiocv/component-code':
+        specifier: workspace:*
+        version: link:../packages/component-code
+      '@fabiocv/orbit-mcp':
+        specifier: workspace:*
+        version: link:../tools/orbit
+      '@types/node':
+        specifier: 26.1.1
+        version: 26.1.1
+      '@types/react':
+        specifier: 19.2.17
+        version: 19.2.17
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.17)
+      '@vitejs/plugin-react':
+        specifier: 6.0.3
+        version: 6.0.3(vite@8.1.4(@types/node@26.1.1)(esbuild@0.28.2))
+      react:
+        specifier: 19.2.7
+        version: 19.2.7
+      react-dom:
+        specifier: 19.2.7
+        version: 19.2.7(react@19.2.7)
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vite:
+        specifier: 8.1.4
+        version: 8.1.4(@types/node@26.1.1)(esbuild@0.28.2)
+      wrangler:
+        specifier: 4.162.0
+        version: 4.162.0(@types/node@26.1.1)
+
+  tools/component-code:
+    devDependencies:
+      '@fabiocv/component-code':
+        specifier: workspace:*
+        version: link:../../packages/component-code
+      '@fabiocv/mcp-ui-tools-core':
+        specifier: workspace:*
+        version: link:../core
       '@modelcontextprotocol/client':
         specifier: 2.4.0
         version: 2.4.0
@@ -65,9 +107,6 @@ importers:
       '@vitejs/plugin-react':
         specifier: 6.0.3
         version: 6.0.3(vite@8.1.4(@types/node@26.1.1)(esbuild@0.28.1))
-      component-code:
-        specifier: workspace:*
-        version: link:../component-code
       esbuild:
         specifier: 0.28.1
         version: 0.28.1
@@ -93,38 +132,75 @@ importers:
         specifier: 4.6.7
         version: 4.6.7
 
-  site:
+  tools/core:
+    dependencies:
+      '@modelcontextprotocol/ext-apps':
+        specifier: 2.0.4
+        version: 2.0.4(@modelcontextprotocol/client@2.4.0)(@modelcontextprotocol/core@2.4.0)(@modelcontextprotocol/server@2.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(zod@4.6.7)
+      '@modelcontextprotocol/server':
+        specifier: 2.4.0
+        version: 2.4.0
+      esbuild:
+        specifier: 0.28.1
+        version: 0.28.1
     devDependencies:
       '@types/node':
         specifier: 26.1.1
         version: 26.1.1
-      '@types/react':
-        specifier: 19.2.17
-        version: 19.2.17
-      '@types/react-dom':
-        specifier: 19.2.3
-        version: 19.2.3(@types/react@19.2.17)
-      '@vitejs/plugin-react':
+      typescript:
         specifier: 6.0.3
-        version: 6.0.3(vite@8.1.4(@types/node@26.1.1)(esbuild@0.28.2))
-      component-code:
+        version: 6.0.3
+
+  tools/mcp-ui-tools:
+    devDependencies:
+      '@fabiocv/component-code-mcp':
         specifier: workspace:*
-        version: link:../packages/component-code
-      react:
-        specifier: 19.2.7
-        version: 19.2.7
-      react-dom:
-        specifier: 19.2.7
-        version: 19.2.7(react@19.2.7)
+        version: link:../component-code
+      '@fabiocv/mcp-ui-tools-core':
+        specifier: workspace:*
+        version: link:../core
+      '@fabiocv/orbit-mcp':
+        specifier: workspace:*
+        version: link:../orbit
+      '@modelcontextprotocol/ext-apps':
+        specifier: 2.0.4
+        version: 2.0.4(@modelcontextprotocol/client@2.4.0)(@modelcontextprotocol/core@2.4.0)(@modelcontextprotocol/server@2.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(zod@4.6.7)
+      '@modelcontextprotocol/server':
+        specifier: 2.4.0
+        version: 2.4.0
+      '@types/node':
+        specifier: 26.1.1
+        version: 26.1.1
       typescript:
         specifier: 6.0.3
         version: 6.0.3
       vite:
         specifier: 8.1.4
         version: 8.1.4(@types/node@26.1.1)(esbuild@0.28.2)
-      wrangler:
-        specifier: 4.162.0
-        version: 4.162.0(@types/node@26.1.1)
+
+  tools/orbit:
+    devDependencies:
+      '@fabiocv/mcp-ui-tools-core':
+        specifier: workspace:*
+        version: link:../core
+      '@modelcontextprotocol/ext-apps':
+        specifier: 2.0.4
+        version: 2.0.4(@modelcontextprotocol/client@2.4.0)(@modelcontextprotocol/core@2.4.0)(@modelcontextprotocol/server@2.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(zod@4.6.7)
+      '@modelcontextprotocol/server':
+        specifier: 2.4.0
+        version: 2.4.0
+      '@types/node':
+        specifier: 26.1.1
+        version: 26.1.1
+      typescript:
+        specifier: 6.0.3
+        version: 6.0.3
+      vite:
+        specifier: 8.1.4
+        version: 8.1.4(@types/node@26.1.1)(esbuild@0.28.2)
+      vite-plugin-singlefile:
+        specifier: 2.3.4
+        version: 2.3.4(vite@8.1.4(@types/node@26.1.1)(esbuild@0.28.2))
 
 packages:
 
@@ -2803,6 +2879,11 @@ snapshots:
     dependencies:
       picomatch: 4.0.7
       vite: 8.1.4(@types/node@26.1.1)(esbuild@0.28.1)
+
+  vite-plugin-singlefile@2.3.4(vite@8.1.4(@types/node@26.1.1)(esbuild@0.28.2)):
+    dependencies:
+      picomatch: 4.0.7
+      vite: 8.1.4(@types/node@26.1.1)(esbuild@0.28.2)
 
   vite@8.1.4(@types/node@26.1.1)(esbuild@0.28.1):
     dependencies:

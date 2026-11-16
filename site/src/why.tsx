@@ -60,20 +60,18 @@ function Bar({
 
 /**
  * A tab cut into a corner, the colour of what is around it, with fillets where
- * it meets the edges. It holds its name, or `children`.
+ * it meets the edges. It holds its name.
  */
 function Notch({
   x,
   y,
   w,
   ground,
-  children,
 }: {
   x: number;
   y: number;
   w: number;
   ground: string;
-  children?: ReactNode;
 }) {
   const h = 20;
   const r = 9;
@@ -87,7 +85,7 @@ function Notch({
         className={ground}
         d={`M${x + w} ${y}h${r}a${r} ${r} 0 0 0-${r} ${r}zM${x} ${y + h}h${r}a${r} ${r} 0 0 0-${r} ${r}z`}
       />
-      {children ?? <Bar x={x + 10} y={y + h / 2} w={w - 24} />}
+      <Bar x={x + 10} y={y + h / 2} w={w - 24} />
     </>
   );
 }
@@ -133,13 +131,11 @@ function Panel({
   box,
   rows,
   preview,
-  tab,
   framed,
 }: {
   box: Box;
   rows: Row[];
   preview: (box: Box) => ReactNode;
-  tab?: (code: Box) => ReactNode;
   framed?: boolean;
 }) {
   const code = codeOf(box);
@@ -164,79 +160,25 @@ function Panel({
       })}
       {/* Filling the card, it nests in the card's `7px` inner corner. */}
       <rect className="sunken" {...rect(code)} rx={framed ? 9 : 7.5} />
-      {tab ? (
-        tab(code)
-      ) : (
-        <Notch x={code.x} y={code.y} w={64} ground="surface" />
-      )}
+      <Notch x={code.x} y={code.y} w={64} ground="surface" />
       <Code box={code} rows={rows} />
       <Notch x={box.x} y={box.y} w={72} ground="subtle" />
     </>
   );
 }
 
-/** The pointer, or with `drag` the arrows a number shows while dragged. */
-function Cursor({ x, y, drag }: { x: number; y: number; drag?: boolean }) {
+/** The arrows a number shows while it is dragged. */
+function Drag({ x, y }: { x: number; y: number }) {
   return (
     <path
       className="cursor"
       transform={`translate(${x} ${y}) scale(1.4)`}
-      d={
-        drag
-          ? 'M-10 0l4.5-4.5v3h11v-3L10 0l-4.5 4.5v-3h-11v3z'
-          : 'M0 0v15l4-3.5 3 6.5 2.6-1.2-3-6.3H12z'
-      }
+      d="M-10 0l4.5-4.5v3h11v-3L10 0l-4.5 4.5v-3h-11v3z"
     />
   );
 }
 
 const FULL = { x: 0, y: 0, w: W, h: H };
-
-/** Dragging a value, and the component growing with it. */
-function Feel() {
-  const code = codeOf(FULL);
-  const y = rowY(code, 3);
-  const x = valueX(code, 36);
-  return (
-    <>
-      <Panel
-        box={FULL}
-        rows={[
-          { tag: 44 },
-          { prop: 38, value: 40, ink: 'string' },
-          { prop: 28, value: 34, ink: 'string' },
-          { prop: 36, value: 14, ink: 'keyword', active: true },
-          { tag: 12 },
-        ]}
-        preview={(preview) => {
-          const { cx, cy } = centre(preview);
-          return (
-            <>
-              <rect
-                className="ghost"
-                x={cx - 54}
-                y={cy - 20}
-                width={108}
-                height={40}
-                rx={13}
-              />
-              <rect
-                className="ink"
-                x={cx - 40}
-                y={cy - 15}
-                width={80}
-                height={30}
-                rx={9}
-              />
-              <Bar className="surface" x={cx - 18} y={cy} w={36} />
-            </>
-          );
-        }}
-      />
-      <Cursor x={x + 12} y={y + 14} drag />
-    </>
-  );
-}
 
 /** A prompt, and the component answering it in the chat. */
 function Review() {
@@ -273,6 +215,56 @@ function Review() {
           );
         }}
       />
+      <Bar x={20} y={238} w={200} />
+      <Bar x={20} y={252} w={132} />
+    </>
+  );
+}
+
+/**
+ * The component in the chat with a value changed until it broke, its label
+ * spilling out of its button, then the reader saying so and the reply.
+ */
+function Broke() {
+  return (
+    <>
+      <rect className="surface" {...rect(FULL)} />
+      <Panel
+        framed
+        box={{ x: 20, y: 20, w: 332, h: 128 }}
+        rows={[
+          { tag: 36 },
+          { prop: 32, value: 70, ink: 'string', active: true },
+          { prop: 28, value: 14, ink: 'keyword' },
+          { tag: 12 },
+        ]}
+        preview={(preview) => {
+          const { cx, cy } = centre(preview);
+          return (
+            <>
+              <rect
+                className="code-string box"
+                x={cx - 34}
+                y={cy - 13}
+                width={68}
+                height={26}
+                rx={13}
+              />
+              <Bar className="code-string" x={cx - 22} y={cy} w={92} />
+            </>
+          );
+        }}
+      />
+      <rect
+        className="subtle"
+        x={188}
+        y={170}
+        width={164}
+        height={42}
+        rx={14}
+      />
+      <Bar x={204} y={185} w={124} />
+      <Bar x={204} y={197} w={64} />
       <Bar x={20} y={238} w={200} />
       <Bar x={20} y={252} w={132} />
     </>
@@ -323,139 +315,86 @@ function Docs() {
   );
 }
 
-/** A value's options, open to pick from. */
-function Designer() {
+/** A flex row, its gap's number dragged, and the gaps it sets tinted. */
+function Flex() {
   const code = codeOf(FULL);
-  const y = rowY(code, 1);
-  const menu = { x: valueX(code, 30) - 5, y: y + 14, w: 116, h: 88 };
-  const item = (index: number) => menu.y + 2 + index * 28;
+  const y = rowY(code, 3);
+  const x = valueX(code, 24);
   return (
     <>
       <Panel
         box={FULL}
         rows={[
           { tag: 40 },
-          { prop: 30, value: 44, ink: 'string', active: true },
-          { prop: 36, value: 14, ink: 'keyword' },
+          { prop: 52, value: 28, ink: 'string' },
+          { prop: 34, value: 40, ink: 'string' },
+          { prop: 24, value: 14, ink: 'keyword', active: true },
           { tag: 12 },
         ]}
         preview={(preview) => {
           const { cx, cy } = centre(preview);
+          const size = 36;
+          const gap = 14;
+          const left = cx - (3 * size + 2 * gap) / 2;
           return (
             <>
-              <rect
-                className="code-string box"
-                x={cx - 42}
-                y={cy - 14}
-                width={84}
-                height={28}
-                rx={14}
-              />
-              <Bar className="code-string" x={cx - 20} y={cy} w={40} />
+              {[0, 1].map((index) => (
+                <rect
+                  key={index}
+                  className="code-keyword active"
+                  x={left + size + index * (size + gap)}
+                  y={cy - size / 2}
+                  width={gap}
+                  height={size}
+                />
+              ))}
+              {[0, 1, 2].map((index) => (
+                <rect
+                  key={index}
+                  className="ink"
+                  x={left + index * (size + gap)}
+                  y={cy - size / 2}
+                  width={size}
+                  height={size}
+                  rx={9}
+                />
+              ))}
             </>
           );
         }}
       />
-      <rect className="subtle menu" {...rect(menu)} rx={12} />
-      <rect
-        className="sunken"
-        x={menu.x + 3}
-        y={item(1)}
-        width={menu.w - 6}
-        height={28}
-        rx={9}
-      />
-      {[52, 44, 60].map((width, index) => (
-        <Bar
-          key={index}
-          className={index === 1 ? 'ink' : 'text'}
-          x={menu.x + 14}
-          y={item(index) + 14}
-          w={width}
-        />
-      ))}
-      <path
-        className="check"
-        d={`M${menu.x + menu.w - 26} ${item(0) + 14}l4 4 8-8`}
-      />
-      <Cursor x={menu.x + 74} y={item(1) + 16} />
+      <Drag x={x + 12} y={y + 14} />
     </>
   );
 }
 
-/** A canvas of dots beside its files, each in a tab, the open one on a pill. */
-function Experiment() {
-  return (
-    <Panel
-      box={FULL}
-      rows={[
-        { tag: 40 },
-        { prop: 44, value: 14, ink: 'keyword' },
-        { prop: 34, value: 10, ink: 'keyword' },
-        { tag: 8 },
-      ]}
-      tab={({ x, y }) => (
-        <Notch x={x} y={y} w={150} ground="surface">
-          <rect
-            className="sunken"
-            x={x + 52}
-            y={y + 3}
-            width={46}
-            height={14}
-            rx={6}
-          />
-          {[0, 1, 2].map((index) => (
-            <Bar
-              key={index}
-              className={index === 1 ? 'ink' : 'text'}
-              x={x + 12 + index * 48}
-              y={y + 10}
-              w={30}
-            />
-          ))}
-        </Notch>
-      )}
-      preview={(preview) => {
-        const { cx, cy } = centre(preview);
-        return Array.from({ length: 11 }, (_, index) => (
-          <circle
-            key={index}
-            className="ink"
-            cx={cx - 65 + index * 13}
-            cy={cy + Math.sin(index * 0.65) * 30}
-            r={5}
-          />
-        ));
-      }}
-    />
-  );
-}
-
-const REASONS = [
+const REASONS: {
+  group?: string;
+  title: string;
+  text: string;
+  Diagram: () => ReactNode;
+}[] = [
   {
-    title: 'API design still matters',
-    text: 'Feel whether an agent gave you a good API or just a working one.',
-    Diagram: Feel,
-  },
-  {
+    group: 'In the chat, with your agent',
     title: "Review an agent's work",
     text: 'Try the API it wrote in the chat, before it lands in your codebase.',
     Diagram: Review,
   },
   {
-    title: 'Docs you can try',
+    title: 'Say what broke',
+    text: 'Break it, then say so. The agent already has the code as you left it.',
+    Diagram: Broke,
+  },
+  {
+    group: 'In your codebase, as a package',
+    title: 'Code as docs you can try',
     text: 'Every prop is a control, and the docs never drift.',
     Diagram: Docs,
   },
   {
-    title: 'Hand it to a designer',
-    text: 'Anyone can try every value without running the project.',
-    Diagram: Designer,
-  },
-  {
-    title: 'Share an experiment',
-    text: 'A canvas, an SVG or a CSS idea, with its numbers out in the open.',
-    Diagram: Experiment,
+    title: 'Learn by changing it',
+    text: 'Explain a layout or an effect with something to play with.',
+    Diagram: Flex,
   },
 ];
 
@@ -490,6 +429,23 @@ function against(
     far: away / step,
     beyond: Math.max(0, left - end) - Math.max(0, start - left - width),
   };
+}
+
+/**
+ * "or" between the two uses, on the cards' ground: a rect as wide as the gap
+ * between them, which flows into each card's edge above and below.
+ */
+function Or() {
+  return (
+    <div className="or" aria-hidden>
+      <svg width="16" height="40" viewBox="-8 -20 16 40">
+        <path d="M-8 -20A8 8 0 0 0 0 -12A8 8 0 0 0 8 -20V20A8 8 0 0 0 0 12A8 8 0 0 0 -8 20Z" />
+        <text y="3.5" textAnchor="middle">
+          or
+        </text>
+      </svg>
+    </div>
+  );
 }
 
 function Arrow({ d }: { d: string }) {
@@ -535,14 +491,21 @@ export function Why() {
       // further out a card is, the further under its neighbours it goes.
       const slots = track.children as HTMLCollectionOf<HTMLElement>;
       const step = slots[1].offsetLeft - slots[0].offsetLeft;
-      for (const slot of slots) {
-        const { far, beyond } = against(
-          origin + slot.offsetLeft,
-          slot.offsetWidth,
-          step,
-          start,
-          end,
-        );
+      // In a row of four, every card is in full.
+      const row = track.scrollWidth <= track.clientWidth;
+      const fars = [...slots].map((slot) =>
+        row
+          ? { far: 0, beyond: 0 }
+          : against(
+              origin + slot.offsetLeft,
+              slot.offsetWidth,
+              step,
+              start,
+              end,
+            ),
+      );
+      fars.forEach(({ far, beyond }, index) => {
+        const slot = slots[index];
         const { style } = slot.firstElementChild as HTMLElement;
         style.filter = far ? `grayscale(${Math.min(1, far)})` : '';
         style.setProperty('--dim', far ? `${Math.min(0.75, far * DIM)}` : '');
@@ -550,7 +513,10 @@ export function Why() {
           ? `translateX(${-beyond * STACK}px) scale(${Math.max(0.76, 1 - far * SHRINK)})`
           : '';
         slot.style.zIndex = far ? `${-Math.round(far * 100)}` : '';
-      }
+        // "or" flows into the cards either side, so only while both are whole.
+        const or = slot.querySelector<HTMLElement>('.or');
+        if (or) or.hidden = Boolean(far || fars[index + 1].far);
+      });
     };
     const update = () => {
       dim();
@@ -615,15 +581,19 @@ export function Why() {
         </div>
       </div>
       <ul className="reasons" ref={list}>
-        {REASONS.map(({ title, text, Diagram }) => (
+        {REASONS.map(({ group, title, text, Diagram }, index) => (
           <li key={title}>
-            <div className="reason">
-              <svg className="diagram" viewBox={`0 0 ${W} ${H}`} aria-hidden>
-                <Diagram />
-              </svg>
-              <h3>{title}</h3>
-              <p>{text}</p>
+            <div className="unit">
+              {group && <div className="label">{group}</div>}
+              <div className="reason">
+                <svg className="diagram" viewBox={`0 0 ${W} ${H}`} aria-hidden>
+                  <Diagram />
+                </svg>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </div>
             </div>
+            {index > 0 && REASONS[index + 1]?.group && <Or />}
           </li>
         ))}
       </ul>

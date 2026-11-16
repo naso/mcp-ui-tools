@@ -1,17 +1,17 @@
 # component-code
 
 A React component beside the code that makes it, where every value in the code
-is a control. Give it your components in `scope` and the code renders as its
-own preview, so the two cannot differ.
+is a control. Give it your components in `scope` and the code renders as its own
+preview, so the two cannot differ.
 
-Under 8 kB gzipped, with no dependencies beyond React.
+About 8 kB gzipped, with no dependencies beyond React.
 
 ```sh
-npm install component-code
+npm install @fabiocv/component-code
 ```
 
 ```tsx
-import { ComponentCode } from 'component-code';
+import { ComponentCode } from '@fabiocv/component-code';
 import { Button } from './Button';
 
 <ComponentCode
@@ -41,6 +41,7 @@ The component adds its own stylesheet, so there is nothing else to import.
 | `children`    | The preview, for code that cannot run from its text, such as code with a hook. Use it instead of `scope`. |
 | `file`        | The file named in the code's tab. `Code` when left out.                                                   |
 | `theme`       | `light` or `dark`. Without it, the page's `color-scheme` decides.                                         |
+| `note`        | A line shown from an info icon beside reset, once the reader changes a value.                             |
 | `className`   | A class for the outer element.                                                                            |
 
 ## What the code can hold
@@ -68,8 +69,8 @@ and its text where that is all it holds, on one line.
 | Any     | Left as written.                                              | `false`              |
 
 A number steps by its last decimal place unless `step` is set: `1` for `8`,
-`0.1` for `0.5`. A prop written alone, such as `open`, is shown as
-`open={true}` so it can switch.
+`0.1` for `0.5`. A prop written alone, such as `open`, is shown as `open={true}`
+so it can switch.
 
 ## Styling
 
@@ -94,7 +95,7 @@ When rendering on a server, put `styles` in the page's head so the first paint
 is styled:
 
 ```tsx
-import { styles } from 'component-code';
+import { styles } from '@fabiocv/component-code';
 
 <style id="component-code">{styles}</style>;
 ```
@@ -102,11 +103,11 @@ import { styles } from 'component-code';
 ## HTML, CSS and JS
 
 For a canvas, an SVG or anything without React, import `ComponentCode` from
-`component-code/html` and give it files. They run together as one page in a
-sandboxed frame, with a tab for each file.
+`@fabiocv/component-code/html` and give it files. They run together as one page
+in a sandboxed frame, with a tab for each file.
 
 ```tsx
-import { ComponentCode } from 'component-code/html';
+import { ComponentCode } from '@fabiocv/component-code/html';
 
 <ComponentCode
   files={{
@@ -124,11 +125,12 @@ import { ComponentCode } from 'component-code/html';
 | `controls`  | The values the reader can change, by name. Each takes `true`, a list of options, or `{ min, max, step }`. |
 | `onChange`  | Called with `{ file, prop, value, code }` as the reader changes a value.                                  |
 | `theme`     | `light` or `dark`. Without it, the page's `color-scheme` decides, and the frame takes the same.           |
+| `note`      | A line shown from an info icon beside reset, once the reader changes a value.                             |
 | `className` | A class for the outer element.                                                                            |
 
-A value is named by its attribute, as `r` or `circle.r`, by its CSS property
-or custom property, as `--speed`, or by the JS `const`, `let` or `var` it sets
-to a number, string or boolean. A CSS number keeps its unit.
+A value is named by its attribute, as `r` or `circle.r`, by its CSS property or
+custom property, as `--speed`, or by the JS `const`, `let` or `var` it sets to a
+number, string or boolean. A CSS number keeps its unit.
 
 A CSS value changes in place as the reader drags it, so a script that reads
 custom properties each frame follows along. A change to the HTML or JS runs the
@@ -140,8 +142,9 @@ When rendering on a server, put its `styles` in the page's head with the id
 
 ## In the chat
 
-[`component-code-mcp`](https://www.npmjs.com/package/component-code-mcp) shows
-a component in Component Code in Claude, ChatGPT, VS Code and other MCP hosts.
+[`@fabiocv/component-code-mcp`](https://www.npmjs.com/package/@fabiocv/component-code-mcp)
+shows a component in Component Code in Claude, ChatGPT, VS Code and other MCP
+hosts.
 
 ## Licence
 

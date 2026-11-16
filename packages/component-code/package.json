@@ -1,5 +1,5 @@
 {
-  "name": "component-code",
+  "name": "@fabiocv/component-code",
   "version": "0.1.0",
   "description": "A React component beside the code that makes it, with every value in the code a control.",
   "keywords": [
@@ -14,7 +14,7 @@
   ],
   "license": "MIT",
   "author": "Fabio Azevedo (https://fabio.cv)",
-  "homepage": "https://componentcode.fabio.cv",
+  "homepage": "https://mcp-ui-tools.fabio.cv/component-code/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/naso/component-code.git",
