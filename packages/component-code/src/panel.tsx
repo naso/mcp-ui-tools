@@ -43,17 +43,7 @@ const tint = (control: Control) =>
 
 function Icon({ d }: { d: string }) {
   return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden>
       <path d={d} />
     </svg>
   );
@@ -81,6 +71,7 @@ function Scrub({ control, onChange, written }: Props) {
     max - min < Infinity
       ? Math.min(12, Math.max(2, (240 * step) / (max - min)))
       : 6;
+  const stop = () => (from.current = null);
   const set = (next: number) => {
     next = Math.min(max, Math.max(min, next));
     if (next !== value) onChange(next);
@@ -104,8 +95,8 @@ function Scrub({ control, onChange, written }: Props) {
           set(from.current.value + steps * step);
         }
       }}
-      onPointerUp={() => (from.current = null)}
-      onPointerCancel={() => (from.current = null)}
+      onPointerUp={stop}
+      onPointerCancel={stop}
       onKeyDown={(event) => {
         const by = event.shiftKey ? step * 10 : step;
         const next = {
@@ -116,7 +107,7 @@ function Scrub({ control, onChange, written }: Props) {
           Home: min,
           End: max,
         }[event.key];
-        if (next !== undefined && Number.isFinite(next)) {
+        if (next !== undefined && isFinite(next)) {
           event.preventDefault();
           set(next);
         }
@@ -156,6 +147,7 @@ function Field({ control, onChange }: Props) {
 /** A value picked from a menu, which stays open to try the others. */
 function Options({ control, onChange, written }: Props) {
   const menu = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const shown = (option: Value) => {
     const quote = typeof option === 'string' ? control.quote : '';
@@ -180,6 +172,7 @@ function Options({ control, onChange, written }: Props) {
   return (
     <>
       <button
+        ref={button}
         type="button"
         className={tint(control)}
         aria-haspopup="menu"
@@ -191,9 +184,7 @@ function Options({ control, onChange, written }: Props) {
           list.style.left = `${left}px`;
           list.style.top = `${bottom + 4}px`;
           list.showPopover();
-          items()
-            .find((item) => item.getAttribute('aria-checked') === 'true')
-            ?.focus();
+          list.querySelector<HTMLElement>('[aria-checked=true]')?.focus();
         }}
       >
         {written}
@@ -206,10 +197,22 @@ function Options({ control, onChange, written }: Props) {
         onKeyDown={(event) => {
           const all = items();
           const at = all.indexOf(document.activeElement as HTMLElement);
-          const by = { ArrowDown: 1, ArrowUp: -1 }[event.key];
-          if (by) {
+          const { key } = event;
+          // A letter jumps to the next option that starts with it.
+          const typed =
+            key.length === 1 &&
+            [...all.slice(at + 1), ...all].find((item) =>
+              item.textContent!.replace(/^\W/, '').startsWith(key),
+            );
+          const to = typed
+            ? all.indexOf(typed)
+            : { ArrowDown: at + 1, ArrowUp: at - 1, Home: 0, End: -1 }[key];
+          // Escape closes the menu by itself, and the value takes the focus
+          // back so the reader carries on from there.
+          if (key === 'Escape') button.current!.focus();
+          if (to !== undefined) {
             event.preventDefault();
-            all[(at + by + all.length) % all.length].focus();
+            all.at(to % all.length)!.focus();
           }
         }}
       >

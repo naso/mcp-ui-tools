@@ -133,3 +133,42 @@ it('shows what a preview threw in its place', () => {
   );
   expect(preview()).toBe('Broken on purpose.');
 });
+
+it('moves through a menu of options from the keyboard', () => {
+  // jsdom has no popovers.
+  HTMLElement.prototype.showPopover ??= function () {};
+  HTMLElement.prototype.hidePopover ??= function () {};
+  const Tag = ({ tone }: { tone: string }) => <span>{tone}</span>;
+  show(
+    <ComponentCode
+      interactive
+      scope={{ Tag }}
+      controls={{ tone: ['neutral', 'success', 'warning', 'danger'] }}
+      code={'<Tag tone="success" />'}
+    />,
+  );
+  const value = host.querySelector<HTMLButtonElement>('[aria-haspopup]')!;
+  const menu = host.querySelector<HTMLElement>('[role="menu"]')!;
+  const focused = () => document.activeElement?.textContent;
+  const press = (key: string) =>
+    act(() => {
+      menu.dispatchEvent(
+        new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }),
+      );
+    });
+
+  act(() => value.click());
+  expect(focused()).toBe('"success"');
+  press('End');
+  expect(focused()).toBe('"danger"');
+  press('Home');
+  expect(focused()).toBe('"neutral"');
+  press('w');
+  expect(focused()).toBe('"warning"');
+  press('x');
+  expect(focused()).toBe('"warning"');
+  press('d');
+  expect(focused()).toBe('"danger"');
+  press('Escape');
+  expect(document.activeElement).toBe(value);
+});

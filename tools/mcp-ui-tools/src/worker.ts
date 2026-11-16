@@ -16,10 +16,20 @@ const HANDLERS: Record<string, ReturnType<typeof createMcpHandler>> = {
   '/orbit/mcp': handler('orbit', orbit),
 };
 
-/** Serves MCP over HTTP. Static assets answer everything else. */
+/** The site's static files, when the worker runs beside them. */
+type Env = { ASSETS?: { fetch(request: Request): Promise<Response> } };
+
+/**
+ * Serves MCP over HTTP. Static assets answer everything else, and a browser
+ * opening a tool's `/mcp` gets that section of its page.
+ */
 export default {
-  fetch(request: Request) {
+  fetch(request: Request, env: Env = {}) {
     const handler = HANDLERS[new URL(request.url).pathname];
+    const page =
+      request.method === 'GET' &&
+      request.headers.get('accept')?.includes('text/html');
+    if (handler && page && env.ASSETS) return env.ASSETS.fetch(request);
     return handler
       ? handler.fetch(request)
       : new Response('Not found', { status: 404 });

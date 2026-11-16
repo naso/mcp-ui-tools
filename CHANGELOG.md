@@ -2,6 +2,21 @@
 
 Every package shares a version. Each release lists what changed in each.
 
+## Unreleased
+
+### @fabiocv/component-code
+
+- The menu of a prop's options answers Home and End, jumps to an option by
+  its first letter, and gives the focus back to the value on Escape.
+
+### @fabiocv/component-code-mcp
+
+- The same menu, in the chat.
+
+### mcp-ui-tools
+
+- The same menu, in the chat.
+
 ## 0.1.1 – 2026-11-16
 
 ### @fabiocv/component-code

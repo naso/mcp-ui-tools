@@ -42,6 +42,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* A thin scrollbar with no track of its own. */
+  scrollbar-width: thin;
+  scrollbar-color: var(--disabled) transparent;
 }
 
 body {
@@ -72,7 +75,7 @@ a {
  * A box that shows on hover: it fades in and springs up to its size. The
  * element holding it is `position: relative` and `isolation: isolate`.
  */
-.switcher summary::before,
+.switcher::before,
 .menu a::before,
 .tool::before {
   content: '';
@@ -185,10 +188,7 @@ a {
  * each tool, with its logo and a line about it.
  */
 .switcher {
-  position: relative;
-}
-
-.switcher summary {
+  all: unset;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -198,18 +198,13 @@ a {
   padding: 6px 8px;
   border-radius: var(--corner);
   color: var(--foreground);
-  font-weight: 500;
-  list-style: none;
+  font: 500 16px/24px var(--sans);
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-.switcher summary::-webkit-details-marker {
-  display: none;
-}
-
-.switcher summary:focus-visible {
+.switcher:focus-visible {
   outline: 2px solid var(--muted);
   outline-offset: -2px;
 }
@@ -219,23 +214,24 @@ a {
   transition: rotate 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 
-.switcher[open] .chevron,
-.manual[aria-expanded='true'] .chevron {
+.switcher[data-popup-open] .chevron,
+.manual[data-panel-open] .chevron {
   rotate: 180deg;
 }
 
 @media (hover: hover) {
-  .switcher summary:hover::before {
+  .switcher:hover::before,
+  .switcher[data-popup-open]::before {
     opacity: 1;
     scale: 1;
   }
 }
 
+.menu-positioner {
+  z-index: 30;
+}
+
 .menu {
-  position: absolute;
-  z-index: 10;
-  top: calc(100% + 4px);
-  left: -12px;
   display: grid;
   gap: 2px;
   width: min(320px, calc(100vw - 8px));
@@ -245,15 +241,17 @@ a {
   box-shadow:
     0 0 0 1px var(--subtle),
     0 8px 24px light-dark(oklch(0% 0 0 / 0.08), oklch(0% 0 0 / 0.4));
-  transform-origin: top left;
+  outline: none;
+  transform-origin: var(--transform-origin);
   transition:
     opacity 0.15s ease-out,
     scale 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
 
-  @starting-style {
-    opacity: 0;
-    scale: 0.96;
-  }
+.menu[data-starting-style],
+.menu[data-ending-style] {
+  opacity: 0;
+  scale: 0.96;
 }
 
 .menu a {
@@ -264,6 +262,7 @@ a {
   isolation: isolate;
   padding: 8px;
   border-radius: var(--corner);
+  outline: none;
   text-decoration: none;
 }
 
@@ -289,17 +288,16 @@ a {
   background: var(--subtle);
 }
 
-@media (hover: hover) {
-  .menu a:hover::before {
-    opacity: 1;
-    scale: 1;
-  }
+/* The row the pointer or the arrow keys are on. */
+.menu a[data-highlighted]::before {
+  opacity: 1;
+  scale: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .menu,
   .chevron,
-  .switcher summary::before,
+  .switcher::before,
   .menu a::before,
   .tool::before {
     transition: none;
@@ -650,8 +648,13 @@ main [id] {
 }
 
 .manual:hover,
-.manual[aria-expanded='true'] {
+.manual[data-panel-open] {
   color: var(--foreground);
+}
+
+/* The commands under Manually, below the buttons. */
+.manual-panel[data-open] {
+  margin-top: 16px;
 }
 
 .manual:focus-visible {
@@ -659,9 +662,6 @@ main [id] {
   outline-offset: 2px;
 }
 
-.clients[hidden] {
-  display: none;
-}
 
 /* The chat, as a host shows it. */
 .chat {

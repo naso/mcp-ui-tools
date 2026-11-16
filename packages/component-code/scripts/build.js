@@ -19,7 +19,16 @@ const inlineCss = {
     build.onLoad({ filter: /.*/, namespace: 'inline-css' }, async (args) => {
       const css = await readFile(args.path, 'utf8');
       const { code } = await transform(css, { loader: 'css', minify: true });
-      return { contents: code.trim(), loader: 'text' };
+      // esbuild keeps the spaces in custom properties and around commas.
+      const tight = code
+        .trim()
+        .replace(/(--[\w-]+): /g, '$1:')
+        .replace(/\(\s+/g, '(')
+        .replace(/\s+\)/g, ')')
+        .replace(/,\s+/g, ',')
+        // Spaces around `*` and `/` are optional, unlike `+` and `-`.
+        .replace(/ ([*/]) /g, '$1');
+      return { contents: tight, loader: 'text' };
     });
   },
 };
