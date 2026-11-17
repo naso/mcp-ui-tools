@@ -5,7 +5,7 @@ import { ComponentCodeLogo, HomeLogo, OrbitLogo } from './logos';
 export const SITE = 'https://mcp-ui-tools.fabio.cv';
 export const GITHUB = 'https://github.com/naso/mcp-ui-tools';
 
-export type PageId = 'home' | 'component-code' | 'orbit';
+export type PageId = 'home' | 'component-code' | 'orbit' | 'brand';
 
 export type Page = {
   id: PageId;
@@ -55,11 +55,26 @@ export const TOOLS: Page[] = [
   },
 ];
 
-export const PAGES = [HOME, ...TOOLS];
+/** The brand, to paint with. It has the home page's logo, and no menu lists it. */
+export const BRAND: Page = {
+  id: 'brand',
+  name: 'Brand',
+  path: '/brand/',
+  summary:
+    'The stencils and the spray paint the site is drawn with, to paint with yourself.',
+  Logo: HomeLogo,
+  icon: '/favicon.svg',
+};
+
+/** The pages the menu lists: the home page and each tool. */
+export const MENU = [HOME, ...TOOLS];
+
+export const PAGES = [...MENU, BRAND];
 
 /** The page at a path, or home. */
 export const pageAt = (path: string) =>
-  TOOLS.find((page) => path.startsWith(page.path.slice(0, -1))) ?? HOME;
+  PAGES.slice(1).find((page) => path.startsWith(page.path.slice(0, -1))) ??
+  HOME;
 
 type Server = {
   /** The server's name in the agent's config. */

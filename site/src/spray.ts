@@ -43,7 +43,7 @@ export function random(seed: number) {
 }
 
 /** Smooth noise from -1 to 1, one bump about every unit. */
-function noise(rand: () => number) {
+export function noise(rand: () => number) {
   const knots = Array.from({ length: 256 }, () => rand() * 2 - 1);
   return (t: number) => {
     const i = Math.floor(t);
@@ -55,10 +55,10 @@ function noise(rand: () => number) {
 }
 
 /** A normally distributed number, by Box–Muller. */
-const gaussian = (rand: () => number) =>
+export const gaussian = (rand: () => number) =>
   Math.sqrt(-2 * Math.log(1 - rand())) * Math.cos(2 * Math.PI * rand());
 
-const smoothstep = (a: number, b: number, x: number) => {
+export const smoothstep = (a: number, b: number, x: number) => {
   const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
   return t * t * (3 - 2 * t);
 };

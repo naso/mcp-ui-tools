@@ -5,7 +5,7 @@ import type { CSSProperties, ReactNode } from 'react';
 
 import { AddToAgent, Code } from './blocks';
 import { Graffiti, graffitiHeight } from './graffiti';
-import { clients, GITHUB, installPrompt, PAGES } from './pages';
+import { clients, GITHUB, installPrompt, MENU } from './pages';
 import type { Page } from './pages';
 
 /** What the graffiti by the opening says. */
@@ -55,7 +55,7 @@ function Switcher({ page }: { page: Page }) {
           sideOffset={4}
         >
           <Menu.Popup className="menu">
-            {PAGES.map(({ id, name, path, summary, Logo }) => (
+            {MENU.map(({ id, name, path, summary, Logo }) => (
               <Menu.LinkItem
                 key={id}
                 href={path}
