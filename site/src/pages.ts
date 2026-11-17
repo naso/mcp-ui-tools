@@ -86,11 +86,11 @@ type Server = {
 };
 
 /** A prompt that has a coding agent add the server itself. */
-export const installPrompt = ({ name, pkg }: Server) =>
-  `Add the ${name} MCP server to this agent. It runs with the command npx -y ${pkg}. Add it the way this agent adds MCP servers, then tell me if I need to restart for its tools to load.`;
+export const installPrompt = ({ name, pkg, remote }: Server) =>
+  `Add the ${name} MCP server to this agent. If this agent takes a remote MCP server by URL, add ${remote}. If not, it runs with the command npx -y ${pkg}. Apps often start servers without the shell's PATH, so use the full path that \`which npx\` prints as the command, and set the server's PATH to include the folder that \`which node\` prints. Add it the way this agent adds MCP servers, then tell me if I need to restart for its tools to load.`;
 
 /** The command or config for each kind of client. */
-export function clients({ name, pkg }: Server) {
+export function clients({ name, pkg, remote }: Server) {
   return [
     {
       name: 'Claude Code',
@@ -110,6 +110,12 @@ export function clients({ name, pkg }: Server) {
     {
       name: 'VS Code',
       code: `code --add-mcp '{"name":"${name}","command":"npx","args":["-y","${pkg}"]}'`,
+    },
+    {
+      name: 'Codex',
+      code: `codex mcp add ${name} --url ${remote}`,
+      // A command, so the TSX colours would read `https:` as a key.
+      plain: true,
     },
   ];
 }

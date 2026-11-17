@@ -35,11 +35,19 @@ VS Code:
 code --add-mcp '{"name":"component-code","command":"npx","args":["-y","@fabiocv/component-code-mcp"]}'
 ```
 
+Codex:
+
+```sh
+codex mcp add component-code --url https://mcp-ui-tools.fabio.cv/component-code/mcp
+```
+
 Claude.ai, ChatGPT and other hosts that take a remote connector:
 
 ```
 https://mcp-ui-tools.fabio.cv/component-code/mcp
 ```
+
+If the app can't find `npx`, as when Node comes from nvm, add the URL instead.
 
 ## The tool
 

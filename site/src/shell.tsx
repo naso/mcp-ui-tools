@@ -184,14 +184,18 @@ export function Clients(props: Parameters<typeof clients>[0]) {
         </div>
         {/* Find in page opens it to show a match. */}
         <Collapsible.Panel className="clients manual-panel" hiddenUntilFound>
-          {clients(props).map(({ name, code }) => (
-            <Code key={name} name={name} code={code} />
+          {clients(props).map(({ name, code, plain }) => (
+            <Code key={name} name={name} code={code} plain={plain} />
           ))}
           <Code
             name="Claude.ai, ChatGPT and other remote connectors"
             code={props.remote}
             plain
           />
+          <p>
+            If the app can't find <code>npx</code>, as when Node comes from
+            nvm, add the URL instead.
+          </p>
         </Collapsible.Panel>
       </Collapsible.Root>
     </div>

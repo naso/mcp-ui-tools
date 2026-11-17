@@ -36,11 +36,19 @@ VS Code:
 code --add-mcp '{"name":"orbit","command":"npx","args":["-y","@fabiocv/orbit-mcp"]}'
 ```
 
+Codex:
+
+```sh
+codex mcp add orbit --url https://mcp-ui-tools.fabio.cv/orbit/mcp
+```
+
 Claude.ai, ChatGPT and other hosts that take a remote connector:
 
 ```
 https://mcp-ui-tools.fabio.cv/orbit/mcp
 ```
+
+If the app can't find `npx`, as when Node comes from nvm, add the URL instead.
 
 ## The tool
 
