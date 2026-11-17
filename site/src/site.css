@@ -802,6 +802,14 @@ main [id] {
   margin-top: 16px;
 }
 
+/*
+ * The prerendered page has it `hidden` until the script makes it
+ * `until-found`, and `.clients` would show it in between.
+ */
+.manual-panel[hidden=''] {
+  display: none;
+}
+
 .manual:focus-visible {
   outline: 2px solid var(--muted);
   outline-offset: 2px;
