@@ -147,7 +147,6 @@ export function Shell({
               {label}
             </a>
           ))}
-          <a href={GITHUB}>GitHub</a>
         </nav>
       </header>
 
