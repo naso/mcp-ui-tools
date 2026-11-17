@@ -81,7 +81,8 @@ function press() {
 
 main.addEventListener('pointerdown', (event) => {
   event.preventDefault();
-  main.focus();
+  // Focused for space, with no ring: the ring is for keyboard focus.
+  main.focus({ focusVisible: false } as FocusOptions);
   press();
 });
 main.addEventListener('keydown', (event) => {
@@ -218,6 +219,12 @@ const applyTheme = (theme?: string) => {
 
 app.addEventListener('hostcontextchanged', (context) =>
   applyTheme(context.theme),
+);
+
+// A frame can learn it is dark only after its script has run.
+matchMedia('(prefers-color-scheme: dark)').addEventListener(
+  'change',
+  readColors,
 );
 
 readColors();

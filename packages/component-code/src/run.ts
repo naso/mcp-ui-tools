@@ -8,21 +8,26 @@ import type { Child, Element, Value } from './parse';
 export type Scope = Readonly<Record<string, unknown>>;
 
 /**
+ * Under this key in a scope, by where each value starts in the code, a
+ * function that writes a new value there. A symbol, so the code cannot name
+ * it.
+ */
+export const SETTERS = Symbol();
+
+/** What a scope holds under `SETTERS`. */
+export type Setters = Map<number, (value: unknown) => void>;
+
+/**
  * JSX text as React shows it: lines trimmed where they meet, empty lines
  * dropped and the rest joined by a space.
  */
-export function text(raw: string) {
-  const lines = raw.split('\n');
-  return decode(
-    lines
-      .map((line, index) => {
-        const start = index > 0 ? line.trimStart() : line;
-        return index < lines.length - 1 ? start.trimEnd() : start;
-      })
+export const text = (raw: string) =>
+  decode(
+    raw
+      .split(/\s*\n\s*/)
       .filter(Boolean)
       .join(' '),
   );
-}
 
 function lookup(path: string[], scope: Scope) {
   const [first, ...members] = path;
@@ -66,7 +71,10 @@ function child(node: Child, scope: Scope): ReactNode {
     : (evaluate(node, scope) as ReactNode);
 }
 
-/** An element, rendered with what `scope` names. A lowercase tag is the browser's own. */
+/**
+ * An element, rendered with what `scope` names. A lowercase tag is the
+ * browser's own.
+ */
 export function render(node: Element, scope: Scope): ReactNode {
   const type = !node.name
     ? Fragment
@@ -74,7 +82,16 @@ export function render(node: Element, scope: Scope): ReactNode {
       ? node.name
       : (lookup(node.name.split('.'), scope) as ElementType);
   const props: Record<string, unknown> = {};
+  const setters = (scope as { [SETTERS]?: Setters })[SETTERS];
   for (const attribute of node.attributes) {
+    // A component gets an `onCheckedChange` beside `checked={true}`, as Base
+    // UI and Radix name them, unless the code writes one, which comes later.
+    const set =
+      typeof type !== 'string' && setters?.get(attribute.value?.start!);
+    if (set) {
+      const { name } = attribute;
+      props[`on${name[0].toUpperCase()}${name.slice(1)}Change`] = set;
+    }
     if (attribute.spread) {
       Object.assign(props, evaluate(attribute.value!, scope));
     } else {

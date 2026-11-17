@@ -71,6 +71,42 @@ export function Code({
   );
 }
 
+/**
+ * Copies a prompt that has an agent add the server itself.
+ */
+export function AddToAgent({ prompt }: { prompt: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      className="agent"
+      aria-label={copied ? 'Copied' : 'Install with a prompt: copy it'}
+      onClick={() =>
+        navigator.clipboard.writeText(prompt).then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1500);
+        })
+      }
+    >
+      Install with a prompt
+      <svg
+        className="agent-copy"
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden
+      >
+        <path d={copied ? CHECK : COPY} />
+      </svg>
+    </button>
+  );
+}
+
 /** A prompt to paste into an agent. */
 export function Prompt({ children }: { children: string }) {
   return (

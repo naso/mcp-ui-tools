@@ -5,7 +5,7 @@ import { edit, findControls, spellBooleans } from './controls';
 import { highlight } from './highlight';
 import { base, dedent, Panel, useStyles } from './panel';
 import { CodeError, parse } from './parse';
-import { render } from './run';
+import { render, SETTERS } from './run';
 import type { Control, ControlOptions } from './controls';
 import type { Scope } from './run';
 
@@ -125,18 +125,36 @@ export function ComponentCode({
   const source = edited.from === written ? edited.to : written;
   const tokens = useMemo(() => highlight(source), [source]);
 
+  const change = (control: Control, value: string | number | boolean) => {
+    const next = edit(source, control, value);
+    setEdited({ from: written, to: next });
+    onChange?.({ prop: control.prop, value, code: next });
+  };
+
   let preview: ReactNode = children;
   let problem: string | undefined;
   let controls: Control[] = [];
   if (scope) {
     try {
       const elements = parse(source);
+      if (interactive) controls = findControls(elements, options);
+      // A component in the preview can write a new value into its code.
+      const named = {
+        ...scope,
+        [SETTERS]: new Map(
+          controls.map((control) => [
+            control.range.start,
+            (value: unknown) =>
+              typeof value === typeof control.value &&
+              change(control, value as string | number | boolean),
+          ]),
+        ),
+      };
       preview = createElement(
         Fragment,
         null,
-        ...elements.map((element) => render(element, scope)),
+        ...elements.map((element) => render(element, named)),
       );
-      if (interactive) controls = findControls(elements, options);
     } catch (error) {
       if (!(error instanceof CodeError)) throw error;
       problem = error.message;
@@ -161,11 +179,7 @@ export function ComponentCode({
       onReset={() => setEdited({ from: written, to: written })}
       tokens={tokens}
       controls={controls}
-      onChange={(control, value) => {
-        const next = edit(source, control, value);
-        setEdited({ from: written, to: next });
-        onChange?.({ prop: control.prop, value, code: next });
-      }}
+      onChange={change}
     />
   );
 }

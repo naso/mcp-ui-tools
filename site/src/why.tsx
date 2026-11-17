@@ -559,8 +559,9 @@ export function Why() {
 
   return (
     <section id="why">
+      <div className="label">What for</div>
       <div className="reasons-head">
-        <div className="label">Why</div>
+        <h2>Two ways to use it</h2>
         <div className="arrows">
           <button
             type="button"

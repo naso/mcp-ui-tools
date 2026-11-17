@@ -1,20 +1,18 @@
 import { Collapsible } from '@base-ui/react/collapsible';
 import { Menu } from '@base-ui/react/menu';
 import { useEffect } from 'react';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 
-import { Code, Prompt } from './blocks';
-import {
-  clients,
-  GITHUB,
-  installLinks,
-  installPrompt,
-  PAGES,
-} from './pages';
+import { AddToAgent, Code } from './blocks';
+import { Graffiti, graffitiHeight } from './graffiti';
+import { clients, GITHUB, installPrompt, PAGES } from './pages';
 import type { Page } from './pages';
 
+/** What the graffiti by the opening says. */
+const GRAFFITI = 'of dubious\nutility';
+
 /** The arrow beside a menu or a section's toggle, which turns over when open. */
-function Chevron() {
+export function Chevron() {
   return (
     <svg
       className="chevron"
@@ -118,7 +116,10 @@ export function Shell({
   }, [page]);
 
   return (
-    <div className="page">
+    <div
+      className="page"
+      style={{ '--graffiti': `${graffitiHeight(GRAFFITI)}px` } as CSSProperties}
+    >
       <div className="edge" aria-hidden>
         <div className="edge-ground" />
         <div className="edge-wide" />
@@ -127,6 +128,7 @@ export function Shell({
         <div className="edge-sharp" />
         <div className="edge-sharp" />
       </div>
+      <Graffiti text={GRAFFITI} />
       <header className="top">
         <Switcher page={page} />
         <nav className="links">
@@ -165,30 +167,16 @@ export function Shell({
 }
 
 /**
- * How to add an MCP server: a prompt for a coding agent and buttons for the
- * apps that take a link. Manually opens each client's command or config and
- * the URL for remote connectors.
+ * How to add an MCP server: a button that copies a prompt for a coding agent.
+ * Manually opens each client's command or config and the URL for remote
+ * connectors.
  */
 export function Clients(props: Parameters<typeof clients>[0]) {
   return (
     <div className="clients">
-      <Prompt>{installPrompt(props)}</Prompt>
       <Collapsible.Root>
         <div className="installs">
-          {installLinks(props).map(({ name, href, icon }) => (
-            <a key={name} className="install" href={href}>
-              <svg
-                width="16"
-                height="16"
-                viewBox={icon.viewBox}
-                fill="currentColor"
-                aria-hidden
-              >
-                <path d={icon.d} />
-              </svg>
-              {name}
-            </a>
-          ))}
+          <AddToAgent prompt={installPrompt(props)} />
           <Collapsible.Trigger className="manual">
             Manually
             <Chevron />

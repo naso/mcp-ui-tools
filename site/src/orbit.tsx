@@ -6,7 +6,6 @@ import { Clients, Shell } from './shell';
 
 const LINKS = [
   { id: 'mcp', label: 'MCP' },
-  { id: 'play', label: 'How to play' },
   { id: 'changelog', label: 'Changelog', wide: true },
 ];
 
@@ -42,20 +41,6 @@ export function OrbitPage() {
           pkg="@fabiocv/orbit-mcp"
           remote={`${SITE}/orbit/mcp`}
         />
-      </section>
-
-      <section id="play">
-        <div className="label">How to play</div>
-        <h2>Miss the arcs</h2>
-        <p>
-          A dot circles two rings. Tap, click or press space to move it to the
-          other ring and miss the arcs ahead. Each arc you pass scores a point,
-          and the dot speeds up.
-        </p>
-        <p>
-          The game follows your chat's light or dark theme, and keeps your best
-          score where the chat lets it.
-        </p>
       </section>
 
       <section id="changelog">

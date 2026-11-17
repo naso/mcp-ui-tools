@@ -24,6 +24,7 @@
   --disabled: light-dark(oklch(72% 0.01 270), oklch(48% 0.01 280));
   --success: light-dark(oklch(46% 0.185 145.3), oklch(84.4% 0.185 145.3));
   --warning: light-dark(oklch(46% 0.191 32.2), oklch(71.2% 0.191 32.2));
+  --spray: light-dark(oklch(45.2% 0.313 264.1), oklch(60% 0.25 264.1));
   /*
    * Corners: 8px for surfaces, buttons and hover boxes, 10px for what holds
    * them 2px in, 6px for what sits 2px inside them, 4px for small things.
@@ -45,6 +46,8 @@ html {
   /* A thin scrollbar with no track of its own. */
   scrollbar-width: thin;
   scrollbar-color: var(--disabled) transparent;
+  /* Keeps the scrollbar's room, so opening a release doesn't shift the page. */
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -89,9 +92,33 @@ a {
   transition:
     opacity 0.15s ease-out,
     scale 0.45s
-      linear(0, 0.055, 0.1785, 0.3265, 0.4727, 0.6034, 0.7128, 0.7999, 0.8665,
-        0.9153, 0.9499, 0.9734, 0.9886, 0.9979, 1.003, 1.0055, 1.0063, 1.0061,
-        1.0053, 1.0044, 1.0035, 1.0026, 1.0019, 1.0014, 1);
+      linear(
+        0,
+        0.055,
+        0.1785,
+        0.3265,
+        0.4727,
+        0.6034,
+        0.7128,
+        0.7999,
+        0.8665,
+        0.9153,
+        0.9499,
+        0.9734,
+        0.9886,
+        0.9979,
+        1.003,
+        1.0055,
+        1.0063,
+        1.0061,
+        1.0053,
+        1.0044,
+        1.0035,
+        1.0026,
+        1.0019,
+        1.0014,
+        1
+      );
 }
 
 /* Header */
@@ -182,6 +209,32 @@ a {
   height: 64px;
 }
 
+/*
+ * Paint sprayed over the page by its opening, in a layer as wide as the window
+ * that cuts off whatever is painted past its edge. It scrolls with the page,
+ * under the header and its blur, and lets clicks through.
+ */
+.graffiti {
+  position: absolute;
+  z-index: 18;
+  inset: 0 0 auto;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* The paint, placed and scaled to fit by the script. */
+.graffiti > div {
+  position: absolute;
+  transform-origin: 0 0;
+}
+
+/* The words, and the smiley in its own colour over them. */
+.graffiti canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
 
 /*
  * The logo and the page's name open a menu of every page: the home page and
@@ -211,7 +264,6 @@ a {
 
 .chevron {
   color: var(--muted);
-  transition: rotate 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 
 .switcher[data-popup-open] .chevron,
@@ -296,7 +348,6 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
   .menu,
-  .chevron,
   .switcher::before,
   .menu a::before,
   .tool::before {
@@ -353,7 +404,10 @@ p {
 }
 
 .lead {
+  /* Leaves the graffiti the same room beside it on every page. */
+  max-width: 440px;
   margin-bottom: 32px;
+  text-wrap: pretty;
 }
 
 /* A part's name, in a tab's type. */
@@ -375,6 +429,18 @@ p {
 
 .hero {
   padding-top: 64px;
+}
+
+/*
+ * On a narrow window the graffiti sits above the opening, so the opening moves
+ * down to make room: the letters' height, which the page sets as --graffiti,
+ * with 30px each side, as ABOVE in graffiti.tsx. Keep the width the same as
+ * NARROW there.
+ */
+@media (max-width: 879px) {
+  .hero {
+    padding-top: calc(var(--graffiti, 0px) + 60px);
+  }
 }
 
 .hero .cc-frame {
@@ -585,6 +651,81 @@ main [id] {
   outline: 2px solid var(--muted);
 }
 
+/*
+ * A tool still to come: a wireframe logo, bars where its name and summary
+ * will be, and a Soon tag. It is not a link, so it has no hover box.
+ */
+.tool-soon::before {
+  content: none;
+}
+
+.tool-soon {
+  outline-style: dashed;
+}
+
+.tool-soon-title {
+  display: flex;
+  align-items: center;
+  height: 24px;
+}
+
+.tool-soon p {
+  display: grid;
+}
+
+/* Each bar sits in a line of the text it stands for. */
+.skeleton {
+  display: block;
+  width: 100%;
+  height: 8px;
+  border-radius: var(--corner-small);
+  background: var(--subtle);
+}
+
+.tool-soon p .skeleton {
+  margin: 6px 0;
+}
+
+/*
+ * A stamp on the logo's bottom-right corner, tilted as if pressed on by hand.
+ * The logo is 40px, 16px in, so that corner is 56px from the card's top and
+ * left; the stamp sits 6px in from it.
+ */
+.soon {
+  position: absolute;
+  top: 50px;
+  left: 50px;
+  translate: -50% -50%;
+  rotate: -12deg;
+  padding: 2px 6px;
+  border-radius: var(--corner-small);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--disabled);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+  letter-spacing: 0.02em;
+  transition:
+    background 0.15s ease-out,
+    box-shadow 0.15s ease-out,
+    color 0.15s ease-out;
+}
+
+/*
+ * Hovering the card fills the stamp in its border's grey, 1px in from the
+ * border, and turns its text the card's colour.
+ */
+@media (hover: hover) {
+  .tool-soon:hover .soon {
+    background: var(--disabled);
+    box-shadow:
+      inset 0 0 0 1px var(--disabled),
+      inset 0 0 0 2px var(--surface);
+    color: var(--surface);
+  }
+}
+
 /* Orbit, running as it does in the chat. */
 .game {
   display: block;
@@ -599,38 +740,42 @@ main [id] {
   gap: 16px;
 }
 
-/* Links that open an app and add the server there. */
+/* The button that copies the prompt, and Manually beside it. */
 .installs {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 16px;
 }
 
-.install {
+/* Copies the prompt that has an agent add the server. */
+.agent {
   display: inline-flex;
   align-items: center;
   gap: 8px;
   height: 36px;
-  padding: 0 14px 0 12px;
+  padding: 0 8px 0 12px;
+  border: 0;
   border-radius: var(--corner);
   background: var(--subtle);
   color: var(--foreground);
-  font-size: 14px;
-  font-weight: 500;
-  line-height: 20px;
-  text-decoration: none;
+  font: 500 14px/20px var(--sans);
+  cursor: pointer;
   transition: background 0.15s ease-out;
 }
 
 @media (hover: hover) {
-  .install:hover {
+  .agent:hover {
     background: var(--disabled);
   }
 }
 
-.install:focus-visible {
+.agent:focus-visible {
   outline: 2px solid var(--muted);
   outline-offset: 2px;
+}
+
+.agent-copy {
+  color: var(--muted);
 }
 
 /* Opens each client's own command or config, at the end of the buttons. */
@@ -661,7 +806,6 @@ main [id] {
   outline: 2px solid var(--muted);
   outline-offset: 2px;
 }
-
 
 /* The chat, as a host shows it. */
 .chat {
@@ -733,7 +877,8 @@ main [id] {
   margin-bottom: 16px;
 }
 
-.reasons-head .label {
+/* The arrows sit on the heading's line. */
+.reasons-head h2 {
   margin: 0;
 }
 
@@ -845,20 +990,6 @@ main [id] {
 .or text {
   fill: var(--muted);
   font: 11px var(--sans);
-}
-
-/*
- * The component on the page, out past the column as far as the cards in Why:
- * in the hero, the chat it sits in, with the install above it, and on its own.
- */
-@media (min-width: 1088px) {
-  .hero > .cc,
-  .chat,
-  .stack,
-  #html > .cc {
-    width: auto;
-    margin-inline: calc((100% + 16px) / -6);
-  }
 }
 
 /*
@@ -1007,20 +1138,80 @@ td:first-child {
   white-space: nowrap;
 }
 
-/* Changelog */
+/* Changelog: a row per release, like the props table's, that opens on its
+   changes. */
+
+.releases {
+  margin-top: 24px;
+  border-bottom: 1px solid var(--subtle);
+}
 
 .release {
-  margin-top: 24px;
+  border-top: 1px solid var(--subtle);
 }
 
-.release h3 {
-  display: flex;
-  gap: 12px;
+.release-header {
+  margin: 0;
+  font: inherit;
 }
 
-.release h3 span {
+.release-trigger {
+  all: unset;
+  box-sizing: border-box;
+  display: grid;
+  /* The gist starts at 198px, in line with Manually beside the install button. */
+  grid-template-columns: 80px 86px 1fr auto;
+  align-items: baseline;
+  gap: 16px;
+  width: 100%;
+  padding: 10px 0;
+  font-size: 14px;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.release-version {
+  color: var(--foreground);
+  font-weight: 500;
+}
+
+.release-date,
+.release-gist {
   color: var(--muted);
-  font-weight: 400;
+}
+
+.release-trigger:hover .release-gist,
+.release-trigger[data-panel-open] .release-gist {
+  color: var(--foreground);
+}
+
+.release-trigger .chevron {
+  align-self: center;
+}
+
+.release-trigger[data-panel-open] .chevron {
+  rotate: 180deg;
+}
+
+.release-trigger:focus-visible {
+  outline: 2px solid var(--muted);
+  outline-offset: 2px;
+  border-radius: var(--corner-small);
+}
+
+.release-panel {
+  /* Lines its packages and bullets up with the gist. */
+  padding-left: 198px;
+}
+
+/* Closed, it is hidden until found but still laid out, so it takes room only
+   when open. */
+.release-panel[data-open] {
+  padding-bottom: 16px;
+}
+
+.release-panel > div:first-child h4 {
+  margin-top: 4px;
 }
 
 .release h4 {
@@ -1033,12 +1224,30 @@ td:first-child {
 
 .release ul {
   margin: 0;
-  padding-left: 20px;
+  /* Starts each bullet at the gist's left edge. */
+  padding-left: 12px;
 }
 
 .release li {
   max-width: 640px;
   margin-bottom: 4px;
+}
+
+/* On a phone the gist goes under the version and date. */
+@media (max-width: 640px) {
+  .release-trigger {
+    grid-template-columns: auto 1fr auto;
+    gap: 4px 12px;
+  }
+
+  .release-gist {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .release-panel {
+    padding-left: 0;
+  }
 }
 
 footer {
@@ -1190,5 +1399,6 @@ footer a:hover {
   color: var(--surface);
   font-size: 11px;
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
   text-align: center;
 }

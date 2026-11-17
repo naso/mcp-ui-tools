@@ -28,22 +28,23 @@ export function Button({
   );
 }
 
+/**
+ * A switch with a label. Given `onCheckedChange`, as Component Code passes,
+ * `checked` is the code's to set, so switching it rewrites the code.
+ */
 export function Toggle({
   label,
   checked = false,
   disabled = false,
+  onCheckedChange,
 }: {
   label: string;
   checked?: boolean;
   disabled?: boolean;
+  onCheckedChange?: (checked: boolean) => void;
 }) {
-  const [on, setOn] = useState(checked);
-  const [from, setFrom] = useState(checked);
-  // A new `checked` from the code sets it again.
-  if (from !== checked) {
-    setFrom(checked);
-    setOn(checked);
-  }
+  const [own, setOwn] = useState(checked);
+  const on = onCheckedChange ? checked : own;
   return (
     <label className="toggle" data-disabled={disabled || undefined}>
       <button
@@ -52,7 +53,7 @@ export function Toggle({
         className="switch"
         aria-checked={on}
         disabled={disabled}
-        onClick={() => setOn(!on)}
+        onClick={() => (onCheckedChange ?? setOwn)(!on)}
       />
       {label}
     </label>

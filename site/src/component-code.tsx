@@ -53,14 +53,8 @@ const IDEAS = [
 ];
 
 const PROPS: [string, string][] = [
-  [
-    'code',
-    'The code as it is written. The blank lines around it and its shared indent are dropped.',
-  ],
-  [
-    'scope',
-    'What the code can name: your components and values. With it, the preview is the code itself, rendered.',
-  ],
+  ['code', 'The code as it is written.'],
+  ['scope', 'What the code can name: your components and values.'],
   [
     'interactive',
     'Makes each string, number, boolean and line of text in the code a control.',
@@ -68,23 +62,6 @@ const PROPS: [string, string][] = [
   [
     'controls',
     'How a prop is changed, by its name or by `Element.prop`: a list of options, `{ min, max, step }` for a number, or `false` to keep it as written.',
-  ],
-  [
-    'onChange',
-    'Called with `{ prop, value, code }` as the reader changes a value.',
-  ],
-  [
-    'children',
-    'The preview, for code that cannot run from its text, such as code with a hook.',
-  ],
-  ['file', "The file named in the code's tab. `Code` when left out."],
-  [
-    'theme',
-    "`light` or `dark`. Without it, the page's `color-scheme` decides.",
-  ],
-  [
-    'note',
-    'A line shown from an info icon beside reset, once the reader changes a value.',
   ],
 ];
 
@@ -96,7 +73,10 @@ import { Badge } from './Badge';
 <ComponentCode
   interactive
   scope={{ Badge }}
-  controls={{ tone: ['neutral', 'success', 'warning'] }}
+  controls={{
+    tone: ['neutral', 'success', 'warning'],
+    count: { min: 0, max: 99 },
+  }}
   code={\`
     <Badge tone="success" count={3}>
       Live
@@ -157,11 +137,8 @@ export function ComponentCodePage() {
         <div className="label">MCP</div>
         <h2>Show it in the chat</h2>
         <p>
-          Ask your agent for a component and say “show it in Component Code”. It
-          writes the component, and the chat shows it running beside the code
-          that uses it, with every value a control. Change a value until
-          something breaks, then just say what is wrong. The agent already has
-          the code as you left it.
+          Ask your agent for a component and say “show it in Component Code”.
+          The chat shows it running beside its code, with every value a control.
         </p>
         <div className="chat">
           <p className="ask">
@@ -191,11 +168,6 @@ export function ComponentCodePage() {
           pkg="@fabiocv/component-code-mcp"
           remote={`${SITE}/component-code/mcp`}
         />
-        <p style={{ marginTop: 24 }}>
-          The component can import React and nothing else, and the code that
-          uses it is plain JSX: elements, props and text. A component keeps any
-          state inside itself.
-        </p>
       </section>
 
       <section id="react">
@@ -212,7 +184,10 @@ export function ComponentCodePage() {
             <ComponentCode
               interactive
               scope={{ Badge }}
-              controls={{ tone: ['neutral', 'success', 'warning'] }}
+              controls={{
+                tone: ['neutral', 'success', 'warning'],
+                count: { min: 0, max: 99 },
+              }}
               code={`
                   <Badge tone="success" count={3}>
                     Live
@@ -221,13 +196,7 @@ export function ComponentCodePage() {
             />
           </ComponentCode>
         </div>
-        <p style={{ marginTop: 24 }}>
-          It reads the code rather than running it: elements, props, text,
-          strings, numbers, booleans, lists, objects and the names in{' '}
-          <code>scope</code>. Anything else says why in place of the preview.
-          For code with a hook, pass the preview as <code>children</code>.
-        </p>
-        <div className="table">
+        <div className="table" style={{ marginTop: 24 }}>
           <table>
             <thead>
               <tr>
@@ -253,21 +222,10 @@ export function ComponentCodePage() {
         <div className="label">HTML</div>
         <h2>Or plain HTML, CSS and JS</h2>
         <p>
-          For a canvas, an SVG or anything without React, import it from{' '}
-          <code>@fabiocv/component-code/html</code> and give it files. They run together
-          in a sandboxed frame, a tab for each, and the values you name in{' '}
-          <code>controls</code> become controls. It is {kb(size.html.gzip)}{' '}
-          gzipped.
+          It works without React too. Import it from{' '}
+          <code>@fabiocv/component-code/html</code> and give it your files.
         </p>
         <PageCode files={WAVES} controls={WAVES_CONTROLS} />
-        <p style={{ marginTop: 24 }}>
-          A CSS value changes as you drag it, so a script that reads custom
-          properties each frame follows along. A change to the HTML or JS runs
-          the page again. Name a value by its attribute, as <code>r</code> or{' '}
-          <code>circle.r</code>, its CSS property or custom property, or the JS{' '}
-          <code>const</code> it sets. In the chat, ask for plain HTML, CSS and
-          JS.
-        </p>
       </section>
 
       <section id="ideas">

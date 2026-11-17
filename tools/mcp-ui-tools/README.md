@@ -4,10 +4,10 @@ MCP Apps that show UI in the chat, in Claude, ChatGPT, VS Code and other MCP
 hosts. This package is one server with every tool. Each tool also installs on
 its own.
 
-| Tool                                               | What it shows                                                      |
-| -------------------------------------------------- | ------------------------------------------------------------------ |
-| [`@fabiocv/component-code-mcp`](../component-code) | A React component or a page beside its code, every value a control |
-| [`@fabiocv/orbit-mcp`](../orbit)                   | A one-button game to play while the agent works                    |
+| Tool                                               | What it shows                                                                        |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| [`@fabiocv/component-code-mcp`](../component-code) | Code with live parameters that you can change and see the component update           |
+| [`@fabiocv/orbit-mcp`](../orbit)                   | A one-button game to play while the agent works. Switch rings to miss the arcs ahead |
 
 ## Add it
 

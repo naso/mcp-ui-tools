@@ -94,3 +94,31 @@ export function OrbitLogo({ size = 20 }: { size?: number }) {
     </Ground>
   );
 }
+
+/**
+ * A tool still to come: the outline of a logo's ground, with a dashed tile
+ * where its mark will sit.
+ */
+export function SoonLogo({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" aria-hidden>
+      <rect
+        x="0.5"
+        y="0.5"
+        width="31"
+        height="31"
+        rx="7.5"
+        stroke="var(--disabled)"
+      />
+      <rect
+        x="4.5"
+        y="4.5"
+        width="23"
+        height="23"
+        rx="4.5"
+        stroke="var(--disabled)"
+        strokeDasharray="2 2"
+      />
+    </svg>
+  );
+}

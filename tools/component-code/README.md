@@ -53,8 +53,11 @@ https://mcp-ui-tools.fabio.cv/component-code/mcp
 | `controls` | How a prop is changed: a list of options, `{ min, max, step }` for a number, or `false`. |
 
 The exports of `source` are what `code` can name, and a default export goes in
-under its function's name. A component keeps any state inside itself, so `code`
-stays plain JSX.
+under its function's name. `code` stays plain JSX. For each value `code` sets,
+such as `checked={true}`, the component gets a handler such as
+`onCheckedChange`, and the tool asks the agent to call it, so switching the
+component in the preview shows in the code the agent gets. State of its own is
+only for when that handler is missing.
 
 `show_html_in_component_code`, titled Show HTML in Component Code, takes:
 

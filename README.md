@@ -45,8 +45,8 @@ shows.
 
 Every package shares a version.
 
-1. Add the release to `CHANGELOG.md`, and set the version in every
-   `package.json` file.
+1. Add the release to `CHANGELOG.md`, with a line on what it brings, and set
+   the version in every `package.json` file.
 2. `pnpm build && pnpm test`
 3. `pnpm --filter @fabiocv/component-code publish` and
    `pnpm --filter "./tools/*" publish`, which skips the private core.

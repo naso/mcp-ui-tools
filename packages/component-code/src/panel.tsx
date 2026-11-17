@@ -41,14 +41,6 @@ const tint = (control: Control) =>
       ? 'cc-box cc-string'
       : 'cc-box';
 
-function Icon({ d }: { d: string }) {
-  return (
-    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden>
-      <path d={d} />
-    </svg>
-  );
-}
-
 const COPY = 'M8 7.5h7.5v8H8zM12 4.5H4.5v8';
 const CHECK = 'M5 10.5l3 3 7-7';
 const RESET = 'M5 8.5a5.5 5.5 0 1 1 .5 4.5M5 4.5v4h4';
@@ -115,6 +107,21 @@ function Scrub({ control, onChange, written }: Props) {
     >
       {written}
     </span>
+  );
+}
+
+/** A boolean, switched with a click. */
+function Switch({ control, onChange, written }: Props) {
+  return (
+    <button
+      type="button"
+      className={tint(control)}
+      aria-label={control.prop}
+      aria-pressed={control.value as boolean}
+      onClick={() => onChange(!control.value)}
+    >
+      {written}
+    </button>
   );
 }
 
@@ -276,26 +283,13 @@ function Code({
       written,
       onChange: (value) => onChange(control, value),
     };
-    nodes.push(
-      control.kind === 'boolean' ? (
-        <button
-          key={`c${index}`}
-          type="button"
-          className={tint(control)}
-          aria-label={control.prop}
-          aria-pressed={control.value as boolean}
-          onClick={() => props.onChange(!control.value)}
-        >
-          {written}
-        </button>
-      ) : control.kind === 'number' ? (
-        <Scrub key={`c${index}`} {...props} />
-      ) : control.kind === 'option' ? (
-        <Options key={`c${index}`} {...props} />
-      ) : (
-        <Field key={`c${index}`} {...props} />
-      ),
-    );
+    const Control = {
+      boolean: Switch,
+      number: Scrub,
+      option: Options,
+      text: Field,
+    }[control.kind];
+    nodes.push(<Control key={`c${index}`} {...props} />);
     at = control.range.end;
   });
   plain(source.length);
@@ -315,6 +309,37 @@ function Code({
   );
 }
 
+/** A button in the code's tab, in a slot that opens as `--shown` turns on. */
+function Action({
+  slot,
+  label,
+  d,
+  hidden,
+  onClick,
+}: {
+  slot: string;
+  label: string;
+  d: string;
+  hidden?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <span className={`cc-slot${slot}`}>
+      <button
+        type="button"
+        className="cc-action"
+        aria-label={label}
+        tabIndex={hidden ? -1 : 0}
+        onClick={onClick}
+      >
+        <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden>
+          <path d={d} />
+        </svg>
+      </button>
+    </span>
+  );
+}
+
 function Actions({
   source,
   changed,
@@ -330,43 +355,27 @@ function Actions({
   return (
     <div className={`cc-tab cc-actions${changed ? ' cc-changed' : ''}`}>
       {note && (
-        <span className="cc-slot cc-note">
-          <button
-            type="button"
-            className="cc-action"
-            aria-label={note}
-            tabIndex={changed ? 0 : -1}
-          >
-            <Icon d={INFO} />
-          </button>
-        </span>
+        <Action slot=" cc-note" label={note} d={INFO} hidden={!changed} />
       )}
-      <span className="cc-slot">
-        <button
-          type="button"
-          className="cc-action"
-          aria-label={copied ? 'Copied' : 'Copy code'}
-          onClick={() =>
-            navigator.clipboard.writeText(source).then(() => {
-              setCopied(true);
-              setTimeout(() => setCopied(false), 1500);
-            })
-          }
-        >
-          <Icon d={copied ? CHECK : COPY} />
-        </button>
-      </span>
-      <span className="cc-slot cc-reset">
-        <button
-          type="button"
-          className="cc-action"
-          aria-label="Reset code"
-          tabIndex={changed ? 0 : -1}
-          onClick={onReset}
-        >
-          <Icon d={RESET} />
-        </button>
-      </span>
+      <Action
+        slot=" cc-reset"
+        label="Reset code"
+        d={RESET}
+        hidden={!changed}
+        onClick={onReset}
+      />
+      {/* Last, as it shows only on hover, so the others stay put. */}
+      <Action
+        slot=""
+        label={copied ? 'Copied' : 'Copy code'}
+        d={copied ? CHECK : COPY}
+        onClick={() =>
+          navigator.clipboard.writeText(source).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+          })
+        }
+      />
     </div>
   );
 }

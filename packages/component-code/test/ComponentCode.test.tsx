@@ -116,6 +116,68 @@ it('changes the code and the preview from its controls', () => {
   expect(preview()).toBe('New 3 round');
 });
 
+function Switch({
+  checked,
+  onCheckedChange,
+}: {
+  checked: boolean;
+  onCheckedChange?: (checked: boolean, event?: unknown) => void;
+}) {
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onCheckedChange?.(!checked, {})}
+    />
+  );
+}
+
+it('writes what a component in the preview changes into its code', () => {
+  const onChange = vi.fn();
+  show(
+    <ComponentCode
+      interactive
+      scope={{ Switch }}
+      onChange={onChange}
+      code={'<Switch checked />'}
+    />,
+  );
+  const toggle = () =>
+    act(() => host.querySelector<HTMLElement>('[role="switch"]')!.click());
+
+  toggle();
+  expect(code()).toBe('<Switch checked={false} />');
+  expect(onChange).toHaveBeenLastCalledWith({
+    prop: 'checked',
+    value: false,
+    code: '<Switch checked={false} />',
+  });
+  toggle();
+  expect(code()).toBe('<Switch checked={true} />');
+  expect(
+    host.querySelector('[role="switch"]')!.getAttribute('aria-checked'),
+  ).toBe('true');
+});
+
+it('leaves a handler the code writes, and code that is not interactive', () => {
+  const own = vi.fn();
+  show(
+    <ComponentCode
+      interactive
+      scope={{ Switch, own }}
+      code={'<Switch checked onCheckedChange={own} />'}
+    />,
+  );
+  act(() => host.querySelector<HTMLElement>('[role="switch"]')!.click());
+  expect(own).toHaveBeenCalledWith(false, {});
+  expect(code()).toBe('<Switch checked={true} onCheckedChange={own} />');
+
+  show(<ComponentCode scope={{ Switch }} code={'<Switch checked />'} />);
+  act(() => host.querySelector<HTMLElement>('[role="switch"]')!.click());
+  expect(code()).toBe('<Switch checked />');
+});
+
 it('says what stops the code from running', () => {
   show(<ComponentCode scope={{}} code="<Missing />" />);
   expect(preview()).toBe('`Missing` is not in `scope`.');

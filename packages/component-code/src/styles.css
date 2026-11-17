@@ -305,10 +305,10 @@
 }
 
 /*
- * Copy and reset in the code's top-right corner. Reset holds the corner once
- * the code has changed; copy shows beside it while the code is hovered or
- * focused, and always where nothing can hover. `--copy` and `--reset` are `1`
- * while each shows.
+ * Reset and copy in the code's top-right corner. Reset shows once the code
+ * has changed; copy holds the corner while the code is hovered or focused,
+ * and always where nothing can hover, so the others keep their place.
+ * `--copy` and `--reset` are `1` while each shows.
  */
 .cc-code:is(:hover, :has(:focus-visible)) {
   --copy: 1;

@@ -1,4 +1,5 @@
 import { Changelog } from './changelog';
+import { SoonLogo } from './logos';
 import { HOME, SITE, TOOLS } from './pages';
 import { Clients, Shell } from './shell';
 
@@ -25,6 +26,22 @@ export function HomePage() {
               <p>{summary}</p>
             </a>
           ))}
+          {/* A tool still to come, its name and summary not yet written. */}
+          <div
+            className="tool tool-soon"
+            role="group"
+            aria-label="Another tool, coming soon"
+          >
+            <SoonLogo size={40} />
+            <span className="soon">Soon</span>
+            <div className="tool-soon-title">
+              <span className="skeleton" style={{ width: 112 }} />
+            </div>
+            <p aria-hidden>
+              <span className="skeleton" />
+              <span className="skeleton" style={{ width: '60%' }} />
+            </p>
+          </div>
         </div>
       </div>
 

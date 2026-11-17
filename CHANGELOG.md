@@ -1,23 +1,47 @@
 # Changelog
 
-Every package shares a version. Each release lists what changed in each.
+Every package shares a version. Each release opens with a line on what it
+brings, then lists what changed in each package.
 
-## Unreleased
+## 0.2.0 – 2026-11-17
+
+A keyboard-friendlier menu of a prop's options, a preview that changes its own
+code, and Orbit in the right colours.
 
 ### @fabiocv/component-code
 
 - The menu of a prop's options answers Home and End, jumps to an option by
   its first letter, and gives the focus back to the value on Escape.
+- A component in the preview can change its own code. For each value the code
+  sets, such as `checked={true}`, it gets a handler such as `onCheckedChange`,
+  and calling it writes the new value into the code.
+- Copy holds the code's top-right corner, and reset shows beside it once the
+  code changes, so copy stays in one place.
+- Copy sits last in the code's corner, after reset, as it shows only on hover,
+  so reset and the note keep their place.
 
 ### @fabiocv/component-code-mcp
 
 - The same menu, in the chat.
+- A component the agent writes changes its code the same way, so a click in
+  the preview shows in the code the agent gets. The tool asks the agent to
+  write components that call these handlers.
+
+### @fabiocv/orbit-mcp
+
+- The game draws in the theme's colours when the chat turns dark or light after
+  it loads, rather than keeping the colours it started with.
+- The focus ring shows only when the game is reached with the keyboard, and
+  sits inside its frame rather than past its edges.
 
 ### mcp-ui-tools
 
-- The same menu, in the chat.
+- The same menu, and the same change to the code, in the chat.
+- Orbit's colours and focus ring, as above.
 
 ## 0.1.1 – 2026-11-16
+
+Links to the new repository.
 
 ### @fabiocv/component-code
 
@@ -36,6 +60,8 @@ Every package shares a version. Each release lists what changed in each.
 - Links to its repository, github.com/naso/mcp-ui-tools.
 
 ## 0.1.0 – 2026-11-16
+
+The first release: Component Code, its MCP App and Orbit.
 
 ### @fabiocv/component-code
 

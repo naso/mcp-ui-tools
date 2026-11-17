@@ -5,7 +5,7 @@ export const PreviewInput = z.object({
   source: z
     .string()
     .describe(
-      "The component's module in TSX. It may import only from 'react'. Its exports, the default one by its function's name, are what `code` can name.",
+      "The component's module in TSX. It may import only from 'react'. Its exports, the default one by its function's name, are what `code` can name. For each value the reader can change by using the component, such as `checked`, `open` or `value`, take a matching `onCheckedChange`, `onOpenChange` or `onValueChange` prop and call it with the new value. Component Code passes it, so the change shows in the code. Keep state of its own only for when the prop is missing.",
     ),
   code: z
     .string()

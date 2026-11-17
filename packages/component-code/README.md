@@ -72,6 +72,25 @@ A number steps by its last decimal place unless `step` is set: `1` for `8`,
 `0.1` for `0.5`. A prop written alone, such as `open`, is shown as `open={true}`
 so it can switch.
 
+A component in the preview can change its own code too. For each value the code
+sets on it, such as `checked={true}`, it gets a handler named the way Base UI
+and Radix name them, such as `onCheckedChange`. Calling it with a new value
+writes that value into the code, so switching a toggle in the preview shows in
+the code. A handler the code writes itself is kept, and the browser's own
+elements get none.
+
+```tsx
+function Toggle({ checked, onCheckedChange }) {
+  return (
+    <button
+      role="switch"
+      aria-checked={checked}
+      onClick={() => onCheckedChange?.(!checked)}
+    />
+  );
+}
+```
+
 ## Styling
 
 It follows the page's `color-scheme`, or `theme`. Each colour and font is a
