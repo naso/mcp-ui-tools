@@ -3,6 +3,23 @@
 Every package shares a version. Each release opens with a line on what it
 brings, then lists what changed in each package.
 
+## 0.2.1 – 2026-11-17
+
+Install steps for Codex, and a way in when an app can't find `npx`.
+
+### @fabiocv/component-code-mcp
+
+- Codex adds it by its URL.
+- An app that can't find `npx`, as when Node comes from nvm, adds the URL instead.
+
+### @fabiocv/orbit-mcp
+
+- The same install steps.
+
+### mcp-ui-tools
+
+- The same install steps.
+
 ## 0.2.0 – 2026-11-17
 
 A keyboard-friendlier menu of a prop's options, a preview that changes its own

@@ -1,6 +1,6 @@
 {
   "name": "@fabiocv/component-code",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A React component beside the code that makes it, with every value in the code a control.",
   "keywords": [
     "react",
