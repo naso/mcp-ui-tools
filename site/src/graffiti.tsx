@@ -147,13 +147,16 @@ const FINGER = 10;
 /** How far a press may move and still count as a click, in pixels. */
 const STILL = 4;
 
-/** The can's paths for the text and its smiley, and the room they take. */
-function shape(text: string) {
-  const { strokes: letters, end } = write(text, SIZE, SEED);
-  const strokes = slant(letters, TILT);
+/**
+ * The can's paths for text in the hand, `size` pixels to the top of an x and
+ * slanted `tilt` degrees, and for its smiley, and the room they take.
+ */
+export function lettering(text: string, size = SIZE, tilt = TILT) {
+  const { strokes: letters, end } = write(text, size, SEED);
+  const strokes = slant(letters, tilt);
   const face = slant(
-    smiley([end[0] + SIZE * 1.3, end[1]], SIZE, SEED + 1),
-    TILT,
+    smiley([end[0] + size * 1.3, end[1]], size, SEED + 1),
+    tilt,
   );
   const points = [...strokes, ...face].flat();
   const left = Math.min(...points.map(([x]) => x));
@@ -164,10 +167,10 @@ function shape(text: string) {
 }
 
 /** How tall the letters of `text` stand, for the room made for them. */
-export const graffitiHeight = (text: string) => Math.ceil(shape(text).tall);
+export const graffitiHeight = (text: string) => Math.ceil(lettering(text).tall);
 
 /** A CSS colour, such as a custom property, as red, green and blue. */
-function rgb(canvas: HTMLCanvasElement, color: string) {
+export function rgb(canvas: HTMLCanvasElement, color: string) {
   canvas.style.color = color;
   const probe = document.createElement('canvas');
   probe.width = probe.height = 1;
@@ -196,7 +199,7 @@ export function Graffiti({ text }: { text: string }) {
     const wall = ref.current!;
     const box = wall.firstElementChild as HTMLDivElement;
     const [canvas, second] = box.querySelectorAll('canvas');
-    const { strokes, face, left, top, wide, tall } = shape(text);
+    const { strokes, face, left, top, wide, tall } = lettering(text);
     const stops: (() => void)[] = [];
     const stop = () => stops.splice(0).forEach((stop) => stop());
     let layers: ReturnType<typeof spray>[] = [];

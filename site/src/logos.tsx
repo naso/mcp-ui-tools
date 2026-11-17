@@ -1,9 +1,57 @@
+import { useId } from 'react';
 import type { ReactNode } from 'react';
 
 /*
- * The logos share a grey rounded square, 2 units of ground around what sits
- * on it, and the surface and subtle greys of the component.
+ * The logos are stencils: a grey rounded square of paint, sprayed through a
+ * sheet. What the paint leaves bare is the sheet's islands, the shapes that
+ * sat on the ground before, and the bridges that hold them to the rest of the
+ * sheet, 1.2 units wide. Where it is bare, whatever is behind shows.
  */
+
+/** How wide a bridge is, in the logo's 32 units. */
+const BRIDGE = 1.2;
+
+/** A bridge from `(x1, y1)` to `(x2, y2)`, across or down. */
+function Bridge({
+  from,
+  to,
+}: {
+  from: [number, number];
+  to: [number, number];
+}) {
+  const [x1, y1] = from;
+  const [x2, y2] = to;
+  const across = y1 === y2;
+  return (
+    <rect
+      x={across ? Math.min(x1, x2) : x1 - BRIDGE / 2}
+      y={across ? y1 - BRIDGE / 2 : Math.min(y1, y2)}
+      width={across ? Math.abs(x2 - x1) : BRIDGE}
+      height={across ? BRIDGE : Math.abs(y2 - y1)}
+    />
+  );
+}
+
+/** The paint, with `children` drawn in black where it is left bare. */
+function Stencil({ size, children }: { size: number; children: ReactNode }) {
+  const id = `stencil${useId().replace(/[^\w-]/g, '')}`;
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
+      <mask id={id}>
+        <rect width="32" height="32" fill="#fff" />
+        <g fill="#000">{children}</g>
+      </mask>
+      <rect
+        className="ground"
+        width="32"
+        height="32"
+        rx="8"
+        fill="var(--disabled)"
+        mask={`url(#${id})`}
+      />
+    </svg>
+  );
+}
 
 /**
  * A squircle tile for the home logo, with the corner that meets the square's
@@ -20,59 +68,64 @@ const TILE = {
     'M13 7A6 6 0 0 1 7 13L6.50 13.00L4.15 12.97L3.19 12.89L2.48 12.75L1.90 12.55L1.43 12.29L1.03 11.97L0.71 11.57L0.45 11.10L0.25 10.52L0.11 9.81L0.03 8.85L0.00 6.50L0.00 6.50L0.03 4.15L0.11 3.19L0.25 2.48L0.45 1.90L0.71 1.43L1.03 1.03L1.43 0.71L1.90 0.45L2.48 0.25L3.19 0.11L4.15 0.03L6.50 0.00L6.50 0.00L8.85 0.03L9.81 0.11L10.52 0.25L11.10 0.45L11.57 0.71L11.97 1.03L12.29 1.43L12.55 1.90L12.75 2.48L12.89 3.19L12.97 4.15L13.00 6.50Z',
 };
 
-function Ground({ size, children }: { size: number; children: ReactNode }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 32 32" aria-hidden>
-      <rect width="32" height="32" rx="8" fill="var(--disabled)" />
-      {children}
-    </svg>
-  );
-}
-
-/** mcp-ui-tools: four tiles, a set of tools. */
+/**
+ * mcp-ui-tools: four tiles, a set of tools, each held by a bridge to the top
+ * or bottom and one to its side.
+ */
 export function HomeLogo({ size = 20 }: { size?: number }) {
   return (
-    <Ground size={size}>
-      <path transform="translate(2 2)" d={TILE.topLeft} fill="var(--surface)" />
-      <path
-        transform="translate(17 2)"
-        d={TILE.topRight}
-        fill="var(--subtle)"
-      />
-      <path
-        transform="translate(2 17)"
-        d={TILE.bottomLeft}
-        fill="var(--subtle)"
-      />
-      <path
-        transform="translate(17 17)"
-        d={TILE.bottomRight}
-        fill="var(--surface)"
-      />
-    </Ground>
+    <Stencil size={size}>
+      <path transform="translate(2 2)" d={TILE.topLeft} />
+      <path transform="translate(17 2)" d={TILE.topRight} />
+      <path transform="translate(2 17)" d={TILE.bottomLeft} />
+      <path transform="translate(17 17)" d={TILE.bottomRight} />
+      {[8.5, 23.5].map((at) => (
+        <g key={at}>
+          <Bridge from={[at, -1]} to={[at, 3]} />
+          <Bridge from={[at, 29]} to={[at, 33]} />
+          <Bridge from={[-1, at]} to={[3, at]} />
+          <Bridge from={[29, at]} to={[33, at]} />
+        </g>
+      ))}
+    </Stencil>
   );
 }
 
-/** Component Code: the preview beside the code. */
+/**
+ * Component Code: the preview beside the code, each held top and bottom, with
+ * a bridge through the middle of each side.
+ */
 export function ComponentCodeLogo({ size = 20 }: { size?: number }) {
   return (
-    <Ground size={size}>
-      <rect x="2" y="2" width="13" height="28" rx="6" fill="var(--surface)" />
-      <rect x="17" y="2" width="13" height="28" rx="6" fill="var(--subtle)" />
-    </Ground>
+    <Stencil size={size}>
+      <rect x="2" y="2" width="13" height="28" rx="6" />
+      <rect x="17" y="2" width="13" height="28" rx="6" />
+      {[8.5, 23.5].map((at) => (
+        <g key={at}>
+          <Bridge from={[at, -1]} to={[at, 3]} />
+          <Bridge from={[at, 29]} to={[at, 33]} />
+        </g>
+      ))}
+      <Bridge from={[-1, 16]} to={[3, 16]} />
+      <Bridge from={[29, 16]} to={[33, 16]} />
+    </Stencil>
   );
 }
 
-/** Orbit: the two rings and the dot that circles them. */
+/**
+ * Orbit: the two rings and the dot that circles them, with paint around the
+ * dot. The outer ring is held at each side, the inner one through the bottom
+ * and the dot through the top.
+ */
 export function OrbitLogo({ size = 20 }: { size?: number }) {
   return (
-    <Ground size={size}>
+    <Stencil size={size}>
       <circle
         cx="16"
         cy="16"
         r="11"
         fill="none"
-        stroke="var(--surface)"
+        stroke="#000"
         strokeWidth="2"
       />
       <circle
@@ -80,18 +133,16 @@ export function OrbitLogo({ size = 20 }: { size?: number }) {
         cy="16"
         r="5.5"
         fill="none"
-        stroke="var(--subtle)"
+        stroke="#000"
         strokeWidth="2"
       />
-      <circle
-        cx="23.78"
-        cy="8.22"
-        r="3.4"
-        fill="var(--surface)"
-        stroke="var(--disabled)"
-        strokeWidth="1.6"
-      />
-    </Ground>
+      <circle cx="23.78" cy="8.22" r="4.2" fill="#fff" />
+      <circle cx="23.78" cy="8.22" r="2.6" />
+      <Bridge from={[-1, 16]} to={[5, 16]} />
+      <Bridge from={[27, 16]} to={[33, 16]} />
+      <Bridge from={[16, 21.5]} to={[16, 33]} />
+      <Bridge from={[23.78, -1]} to={[23.78, 8.22]} />
+    </Stencil>
   );
 }
 
