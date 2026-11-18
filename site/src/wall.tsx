@@ -127,6 +127,12 @@ const LIFT_EDGE = { side: 26, top: 40, bottom: 16 };
 /** The most pixels the wall is drawn with, however sharp the screen. */
 const MOST = 1.8e6;
 
+/**
+ * Pixels to a CSS pixel in a saved drawing, whatever the screen it was
+ * painted on, so one opens back on the wall at the size it was painted.
+ */
+const DENSITY = 2;
+
 /** A name that shows beside its button when the pointer rests on it. */
 function Tip({
   label,
@@ -199,6 +205,8 @@ export function Wall({
   const galleryButton = useRef<HTMLButtonElement>(null);
   /** The drawing from the gallery the wall was opened with, under its paint. */
   const [under, setUnder] = useState<string>();
+  /** Its size on the wall, the size it was painted, once it has loaded. */
+  const [underSize, setUnderSize] = useState<[number, number]>();
 
   /** A new sheet in the middle of the wall, a step off for each one there. */
   const put = (kind: number, angle: number, others: number): Placed => {
@@ -489,38 +497,29 @@ export function Wall({
 
   /**
    * The wall as it looks, for the gallery: its paint, with the sheets still
-   * on it, at the pixels it is drawn with. WebP where the browser saves it,
-   * and JPEG where it doesn't.
+   * on it, at `DENSITY` pixels to a CSS pixel. WebP where the browser saves
+   * it, and JPEG where it doesn't.
    */
   const picture = async () => {
     const box = face.current!;
     const painted = box.querySelector('canvas')!;
-    const scale = painted.width / box.clientWidth;
+    const scale = DENSITY;
     const canvas = document.createElement('canvas');
-    canvas.width = painted.width;
-    canvas.height = painted.height;
+    canvas.width = box.clientWidth * scale;
+    canvas.height = box.clientHeight * scale;
     const ctx = canvas.getContext('2d')!;
     ctx.fillStyle = `rgb(${rgb(painted, 'var(--surface)').join(' ')})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // The drawing it was opened with, covering the wall as it shows.
+    // The drawing it was opened with, at its size, in the middle as it shows.
     const drawn = box.querySelector<HTMLImageElement>('.wall-under');
     if (drawn) await drawn.decode().catch(() => {});
-    if (drawn?.naturalWidth) {
-      const fit = Math.max(
-        canvas.width / drawn.naturalWidth,
-        canvas.height / drawn.naturalHeight,
-      );
-      const w = drawn.naturalWidth * fit;
-      const h = drawn.naturalHeight * fit;
+    if (drawn?.naturalWidth)
       ctx.drawImage(
         drawn,
-        (canvas.width - w) / 2,
-        (canvas.height - h) / 2,
-        w,
-        h,
+        Math.round((canvas.width - drawn.naturalWidth) / 2),
+        Math.round((canvas.height - drawn.naturalHeight) / 2),
       );
-    }
-    ctx.drawImage(painted, 0, 0);
+    ctx.drawImage(painted, 0, 0, canvas.width, canvas.height);
     // Each sheet's shadow, as the stylesheet casts it.
     ctx.shadowColor = 'rgb(0 0 0 / 0.2)';
     ctx.shadowBlur = 1.5 * scale;
@@ -552,6 +551,7 @@ export function Wall({
   const reset = () => {
     paint.current!.clear();
     setUnder(undefined);
+    setUnderSize(undefined);
     open();
   };
 
@@ -564,6 +564,7 @@ export function Wall({
     setSheets([]);
     setHeld(undefined);
     setUnder(imageOf(id));
+    setUnderSize(undefined);
     setShowing(false);
   };
 
@@ -769,10 +770,16 @@ export function Wall({
       >
         {under && (
           <img
+            key={under}
             className="wall-under"
             src={under}
             alt=""
             crossOrigin="anonymous"
+            hidden={!underSize}
+            style={underSize && { width: underSize[0], height: underSize[1] }}
+            onLoad={({ currentTarget: { naturalWidth, naturalHeight } }) =>
+              setUnderSize([naturalWidth / DENSITY, naturalHeight / DENSITY])
+            }
           />
         )}
         <canvas />
