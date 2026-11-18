@@ -4,7 +4,7 @@ A React component beside the code that makes it, where every value in the code
 is a control. Give it your components in `scope` and the code renders as its own
 preview, so the two cannot differ.
 
-About 8 kB gzipped, with no dependencies beyond React.
+About 9 kB gzipped, with no dependencies beyond React.
 
 ```sh
 npm install @fabiocv/component-code

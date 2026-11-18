@@ -380,6 +380,111 @@ function Actions({
   );
 }
 
+/** The width a side keeps while dragged, before it starts to resist. */
+const MIN = 160;
+/** How far a resisting side gives at most, in pixels. */
+const GIVE = 40;
+/** How far past `MIN` the pointer goes before the side closes. */
+const CLOSE = 80;
+/** A critically damped spring that settles in about a third of a second. */
+const STIFFNESS = ((2 * Math.PI) / 0.35) ** 2;
+const DAMPING = (4 * Math.PI) / 0.35;
+
+/**
+ * The line between the preview and its code, dragged to share the width as
+ * `--split`, the preview's share. Past `MIN` a side resists, easing more the
+ * closer it gets to the edge, and `CLOSE` past it the side closes. The line
+ * follows the pointer; when a side closes or opens, or is let go while
+ * resisting and goes back to `MIN`, a spring takes it from where it was.
+ */
+function Split() {
+  const line = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const handle = line.current!;
+    const root = handle.parentElement!;
+    const frame = root.firstElementChild!;
+    // Where the line is going, as the preview's share, and how far it is from
+    // there, which the spring takes to nothing as the line follows along.
+    let to = 0.5;
+    let off = 0;
+    let speed = 0;
+    let track = 1;
+    // Which side is closed: the preview, `-1`, or the code, `1`.
+    let closed = 0;
+    let grab: number | undefined;
+    let last = 0;
+    let frameId = 0;
+
+    const show = () =>
+      root.style.setProperty(
+        '--split',
+        `${Math.min(1, Math.max(0, to + off))}`,
+      );
+    const tick = (now: number) => {
+      const time = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      for (let step = 0; step < time; step += 0.001) {
+        speed -= (STIFFNESS * off + DAMPING * speed) * 0.001;
+        off += speed * 0.001;
+      }
+      if (Math.abs(off) * track < 0.5) off = speed = frameId = 0;
+      else frameId = requestAnimationFrame(tick);
+      show();
+    };
+    const jump = (next: number) => {
+      off = matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 0
+        : off + to - next;
+      to = next;
+      if (!frameId) {
+        last = performance.now();
+        frameId = requestAnimationFrame(tick);
+      }
+    };
+    // A side `wanted` wide: resisting under `MIN`, and closed `CLOSE` past it.
+    // Once closed, it opens again `16px` further out, so it does not flicker.
+    const ease = (wanted: number, shut: boolean) => {
+      const over = MIN - wanted;
+      return over <= 0
+        ? wanted
+        : over > CLOSE - (shut ? 16 : 0)
+          ? 0
+          : MIN - GIVE * (1 - Math.exp(-over / GIVE));
+    };
+
+    handle.onpointerdown = (event) => {
+      event.preventDefault();
+      handle.setPointerCapture(event.pointerId);
+      // The frame's width less its padding and the gap.
+      track = frame.clientWidth - 6;
+      grab = event.clientX - to * track;
+    };
+    handle.onpointermove = (event) => {
+      if (grab === undefined) return;
+      const wanted = event.clientX - grab;
+      const preview = ease(wanted, closed < 0);
+      const code = ease(track - wanted, closed > 0);
+      const next = (preview === wanted ? track - code : preview) / track;
+      const was = closed;
+      closed = preview ? (code ? 0 : 1) : -1;
+      if (closed === was) to = next;
+      else jump(next);
+      show();
+    };
+    handle.onpointerup = handle.onpointercancel = () => {
+      if (grab === undefined) return;
+      grab = undefined;
+      // A side let go while resisting goes back to `MIN`.
+      const preview = to * track;
+      if (!closed && Math.min(preview, track - preview) < MIN) {
+        jump((preview < MIN ? MIN : track - MIN) / track);
+      }
+    };
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+  return <div ref={line} className="cc-split" aria-hidden />;
+}
+
 /** The preview beside the code, with the code's tab, copy and reset. */
 export function Panel({
   className,
@@ -420,6 +525,7 @@ export function Panel({
         </div>
       </div>
       <div className="cc-tab">Preview</div>
+      <Split />
     </div>
   );
 }

@@ -27,6 +27,17 @@
   --cc-ease: 0.24s cubic-bezier(0.2, 0.9, 0.3, 1);
   --copy: 0;
   --reset: 0;
+  /*
+   * Side by side: the preview's share of the width, the gap after it, which
+   * closes with either side, and where the preview ends.
+   */
+  --split: 0.5;
+  --seam: min(
+    2px,
+    var(--split) * (100cqw - 4px),
+    (1 - var(--split)) * (100cqw - 4px)
+  );
+  --edge: calc(2px + var(--split) * (100cqw - 4px - var(--seam)));
 
   position: relative;
   box-sizing: border-box;
@@ -64,9 +75,45 @@
   background: var(--cc-surface);
 }
 
+/* The line's grip, `10px` across the gap, from the top to the bottom. */
+.cc-split {
+  position: absolute;
+  inset: 0 auto;
+  left: calc(var(--edge) + var(--seam) / 2 - 5px);
+  display: none;
+  width: 10px;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+/*
+ * Side by side, the preview takes `--split` of the width, which the line
+ * between them drags. Each side clips what it holds as it narrows: the
+ * preview and its tab where the preview ends, and the code at its right, so
+ * its tabs still reach the frame.
+ */
 @container (min-width: 640px) {
   .cc-frame {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+      calc(var(--split) * (100% - var(--seam)))
+      minmax(0, 1fr);
+    column-gap: var(--seam);
+  }
+
+  .cc-preview {
+    overflow: clip;
+  }
+
+  .cc-code {
+    clip-path: inset(-2px 0 0 -2px);
+  }
+
+  .cc > .cc-tab {
+    clip-path: inset(-1px calc(100% - var(--edge)) -6px -1px);
+  }
+
+  .cc-split {
+    display: block;
   }
 }
 
