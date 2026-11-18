@@ -148,6 +148,12 @@ const MOST = 1.8e6;
  */
 const DENSITY = 2;
 
+/**
+ * The wall's version, after its name. Raised with each update to the wall,
+ * apart from the packages' version.
+ */
+const VERSION = '1.0.0';
+
 /** A name that shows beside its button when the pointer rests on it. */
 function Tip({
   label,
@@ -756,7 +762,9 @@ export function Wall({
 
   return (
     <div className="wall" data-compact={compact || undefined}>
-      <div className="tab">Wall</div>
+      <div className="tab">
+        Wall <span className="tab-version">{VERSION}</span>
+      </div>
       <div className="copy">
         <button type="button" aria-label="Start over" onClick={reset}>
           <svg

@@ -62,6 +62,10 @@ Every package shares a version.
 A drawing shows in the gallery as soon as it is saved.
 `pnpm --filter site hide <id or image URL>` takes one out of it.
 
+The wall shows its own version after its name, `VERSION` in
+`site/src/wall.tsx`, apart from the packages' version. Raise it when an
+update to the wall goes out.
+
 ## Licence
 
 MIT

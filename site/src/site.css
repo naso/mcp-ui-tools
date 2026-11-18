@@ -1441,6 +1441,13 @@ footer a:hover {
   pointer-events: none;
 }
 
+/* The wall's version, after its name, in the fainter colour. */
+.tab-version {
+  margin-left: 4px;
+  color: var(--disabled);
+  font-variant-numeric: tabular-nums;
+}
+
 /* The wall itself, the page's colour. A touch paints it rather than scrolls. */
 .wall-face {
   position: relative;
