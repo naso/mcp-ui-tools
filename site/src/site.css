@@ -1890,6 +1890,44 @@ footer a:hover {
   }
 }
 
+/* The left bar is as thin as its icons. */
+.bar-left .pick {
+  width: 28px;
+  padding: 0;
+}
+
+/* A button's name beside it, as the menu shows: on the page's colour. */
+.tip-place {
+  z-index: 30;
+}
+
+.tip {
+  padding: 2px 8px;
+  border-radius: var(--corner-inner);
+  background: var(--surface);
+  box-shadow:
+    0 0 0 1px var(--subtle),
+    0 8px 24px light-dark(oklch(0% 0 0 / 0.08), oklch(0% 0 0 / 0.4));
+  color: var(--foreground);
+  font: 12px/20px var(--sans);
+  white-space: nowrap;
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 0.15s ease-out,
+    scale 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.tip[data-starting-style],
+.tip[data-ending-style] {
+  opacity: 0;
+  scale: 0.96;
+}
+
+/* Moving between buttons, the name changes without fading. */
+.tip[data-instant] {
+  transition: none;
+}
+
 /* The wall page shows the card at the size X gives it on a wide screen. */
 .wall-card {
   max-width: 600px;

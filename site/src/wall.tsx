@@ -1,5 +1,11 @@
+import { Tooltip } from '@base-ui/react/tooltip';
 import { useEffect, useRef, useState } from 'react';
-import type { CSSProperties, PointerEvent as Press } from 'react';
+import type {
+  CSSProperties,
+  PointerEvent as Press,
+  ReactElement,
+  ReactNode,
+} from 'react';
 
 import { rgb } from './graffiti';
 import { ROUND, SHEET, wall } from './paint';
@@ -10,10 +16,55 @@ import { cutOf, STENCILS } from './stencils';
 
 type Tool = 'move' | 'spray' | 'smudge';
 
-const TOOLS: { id: Tool; name: string }[] = [
-  { id: 'move', name: 'Move' },
-  { id: 'spray', name: 'Spray' },
-  { id: 'smudge', name: 'Smudge' },
+/** A tool's icon, for the compact wall's bar: 20px, in a 1.5px line. */
+const icon = (path: ReactNode) => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    {path}
+  </svg>
+);
+
+const TOOLS: { id: Tool; name: string; icon: ReactNode }[] = [
+  {
+    id: 'move',
+    name: 'Move',
+    // Arrows out to each side.
+    icon: icon(
+      <path d="M10 3v14M3 10h14M10 3 8 5M10 3l2 2M10 17l-2-2M10 17l2-2M3 10l2-2M3 10l2 2M17 10l-2-2M17 10l-2 2" />,
+    ),
+  },
+  {
+    id: 'spray',
+    name: 'Spray',
+    // A can, its nozzle, and the paint leaving it.
+    icon: icon(
+      <>
+        <rect x="4" y="8" width="7" height="9" rx="1.5" />
+        <path d="M6 8V6h3v2M7.5 6V4.5h2" />
+        <path d="M13 4.5h.01M15.5 3.5h.01M15.5 6h.01M13.5 7h.01" />
+      </>,
+    ),
+  },
+  {
+    id: 'smudge',
+    name: 'Smudge',
+    // A fingertip drawn through a line of paint.
+    icon: icon(
+      <>
+        <path d="M3 14c2.5-2 4.5-2 7 0s4.5 2 7 0" />
+        <path d="M8 10.5V5a1.5 1.5 0 0 1 3 0v5.5" />
+      </>,
+    ),
+  },
 ];
 
 /** The caps, by how wide a line each sprays, in pixels. */
@@ -54,6 +105,20 @@ const LIFT = 200;
 
 /** The most pixels the wall is drawn with, however sharp the screen. */
 const MOST = 1.8e6;
+
+/** A name that shows beside its button when the pointer rests on it. */
+function Tip({ label, children }: { label: string; children: ReactElement }) {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger render={children} />
+      <Tooltip.Portal>
+        <Tooltip.Positioner side="right" sideOffset={8} className="tip-place">
+          <Tooltip.Popup className="tip">{label}</Tooltip.Popup>
+        </Tooltip.Positioner>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  );
+}
 
 /** A stencil on the wall. `leaving` while it lifts off. */
 type Placed = Place & { id: number; kind: number; leaving?: boolean };
@@ -321,40 +386,63 @@ export function Wall({ compact = false }: { compact?: boolean }) {
 
   const tools = (
     <div className="picks" role="group" aria-label="Tool">
-      {TOOLS.map(({ id, name }) => (
-        <button
-          key={id}
-          type="button"
-          className="pick"
-          aria-pressed={tool === id}
-          onClick={() => setTool(id)}
-        >
-          {name}
-        </button>
-      ))}
+      {TOOLS.map(({ id, name, icon }) =>
+        compact ? (
+          <Tip key={id} label={name}>
+            <button
+              type="button"
+              className="pick"
+              aria-label={name}
+              aria-pressed={tool === id}
+              onClick={() => setTool(id)}
+            >
+              {icon}
+            </button>
+          </Tip>
+        ) : (
+          <button
+            key={id}
+            type="button"
+            className="pick"
+            aria-pressed={tool === id}
+            onClick={() => setTool(id)}
+          >
+            {name}
+          </button>
+        ),
+      )}
     </div>
   );
 
   const caps = (
     <div className="picks" role="group" aria-label="Cap">
-      {CAPS.map(({ name }, index) => (
-        <button
-          key={name}
-          type="button"
-          className="pick"
-          aria-label={`${name} cap`}
-          aria-pressed={cap === index}
-          onClick={() => {
-            setCap(index);
-            setTool('spray');
-          }}
-        >
-          <span
-            className="dot"
-            style={{ '--dot': `${4 + index * 5}px` } as CSSProperties}
-          />
-        </button>
-      ))}
+      {CAPS.map(({ name }, index) => {
+        const button = (
+          <button
+            key={name}
+            type="button"
+            className="pick"
+            aria-label={`${name} cap`}
+            aria-pressed={cap === index}
+            onClick={() => {
+              setCap(index);
+              setTool('spray');
+            }}
+          >
+            <span
+              className="dot"
+              style={{ '--dot': `${4 + index * 5}px` } as CSSProperties}
+            />
+          </button>
+        );
+        return compact ? (
+          <Tip key={name} label={`${name} cap`}>
+            {button}
+          </Tip>
+        ) : (
+          button
+        );
+      })}
     </div>
   );
 
@@ -533,11 +621,14 @@ export function Wall({ compact = false }: { compact?: boolean }) {
 
       {compact ? (
         <>
-          <div className="bar bar-left">
-            {tools}
-            <hr />
-            {caps}
-          </div>
+          {/* Moving from one to the next shows each name at once. */}
+          <Tooltip.Provider>
+            <div className="bar bar-left">
+              {tools}
+              <hr />
+              {caps}
+            </div>
+          </Tooltip.Provider>
           <div className="bar bar-right">{cans}</div>
           <div className="bar bar-bottom">
             {stencils}
