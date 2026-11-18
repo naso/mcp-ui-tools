@@ -609,14 +609,6 @@ export function Wall({
   return (
     <div className="wall" data-compact={compact || undefined}>
       <div className="tab">Wall</div>
-      {credit && (
-        <p className="credit">
-          hallucinated by{' '}
-          <a href="https://x.com/naso" target="_blank">
-            Fabio
-          </a>
-        </p>
-      )}
       <div className="copy">
         <button type="button" aria-label="Start over" onClick={reset}>
           <svg
@@ -746,9 +738,20 @@ export function Wall({
             </div>
           </Tooltip.Provider>
           <div className="bar bar-right">{cans}</div>
-          <Tooltip.Provider>
-            <div className="bar bar-bottom">{stencils}</div>
-          </Tooltip.Provider>
+          {/* The stencils, in the middle of the room the credit leaves. */}
+          <div className="bar-row">
+            <Tooltip.Provider>
+              <div className="bar bar-bottom">{stencils}</div>
+            </Tooltip.Provider>
+            {credit && (
+              <p className="credit">
+                <span>hallucinated by</span>{' '}
+                <a href="https://x.com/naso" target="_blank">
+                  Fabio
+                </a>
+              </p>
+            )}
+          </div>
         </>
       ) : (
         <div className="kit">

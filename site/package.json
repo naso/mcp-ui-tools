@@ -8,6 +8,7 @@
     "build": "vite build && vite build --ssr src/server.tsx --outDir dist-server && node scripts/prerender.js",
     "check-types": "tsc --noEmit",
     "images": "node scripts/images.js",
+    "player-image": "node scripts/player.js",
     "deploy": "pnpm --dir .. build && wrangler deploy"
   },
   "devDependencies": {

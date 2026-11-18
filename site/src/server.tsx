@@ -18,7 +18,7 @@ const escape = (text: string) =>
  * What X shows for a link to the page: its image, or, for a page with a
  * player, the player itself, which X plays inside the post.
  */
-function card({ player }: Page) {
+function card({ id, player }: Page) {
   if (!player)
     return ['<meta name="twitter:card" content="summary_large_image" />'];
   return [
@@ -29,6 +29,9 @@ function card({ player }: Page) {
     `<meta name="twitter:player:height" content="${player.height}" />`,
     `<meta name="twitter:title" content="${escape(player.title)}" />`,
     `<meta name="twitter:description" content="${escape(player.description)}" />`,
+    // Square, as the card shows it; `scripts/player.js` draws it.
+    `<meta name="twitter:image" content="${SITE}/og/${id}-player.png" />`,
+    `<meta name="twitter:image:alt" content="${escape(player.title)}" />`,
   ];
 }
 

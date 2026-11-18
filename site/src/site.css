@@ -1871,15 +1871,50 @@ footer a:hover {
   right: 10px;
 }
 
-.bar-bottom {
+/*
+ * The bottom row: the stencils, in the middle of the room the credit leaves
+ * at its right end.
+ */
+.bar-row {
+  position: absolute;
+  z-index: 1;
+  right: 12px;
   bottom: 10px;
-  left: 50%;
-  translate: -50% 0;
+  left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.bar-row > * {
+  pointer-events: auto;
+}
+
+.bar-bottom {
+  position: static;
+  margin: 0 auto;
 }
 
 .bar .pick-stencil {
   width: 28px;
   height: 28px;
+}
+
+/*
+ * On a narrow wall, the credit takes two lines and the stencils' buttons are
+ * a little smaller, so the row still fits.
+ */
+@container (max-width: 359px) {
+  .credit a {
+    display: block;
+  }
+
+  .bar .pick-stencil {
+    min-width: 24px;
+    width: 24px;
+    height: 24px;
+  }
 }
 
 /* With too little height for a column of cans, they take two. */
@@ -1903,19 +1938,14 @@ footer a:hover {
   font-size: 12px;
 }
 
-/*
- * Who made it, in the bottom right corner, just above the stencils' row so it
- * fits beside them on a phone too. Only the name is a link.
- */
+/* Who made it, at the bottom row's right end. Only the name is a link. */
 .credit {
-  position: absolute;
-  z-index: 1;
-  right: 12px;
-  bottom: 50px;
+  flex: none;
   margin: 0;
   color: var(--disabled);
   font-size: 12px;
   line-height: 16px;
+  text-align: right;
   pointer-events: none;
 }
 
