@@ -30,7 +30,9 @@ const inlineCss = {
         .replace(/,\s+/g, ',')
         // Spaces around `*` and `/` are optional, unlike `+` and `-`.
         .replace(/ ([*/]) /g, '$1');
-      return { contents: tight, loader: 'text' };
+      // Outside the file namespace, a watch build sees the stylesheet only
+      // when it is named here.
+      return { contents: tight, loader: 'text', watchFiles: [args.path] };
     });
   },
 };

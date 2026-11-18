@@ -459,7 +459,7 @@ function Split() {
       // The frame's width less its padding and the gap.
       track = frame.clientWidth - 6;
       grab = event.clientX - to * track;
-      handle.dataset.dragging = '';
+      handle.dataset.drag = '';
     };
     handle.onpointermove = (event) => {
       if (grab === undefined) return;
@@ -491,7 +491,7 @@ function Split() {
     handle.onpointerup = handle.onpointercancel = () => {
       if (grab === undefined) return;
       grab = undefined;
-      delete handle.dataset.dragging;
+      delete handle.dataset.drag;
       // A side let go short of `MIN` goes to it, unless it was closed and is
       // still short of where it would close, when it closes again.
       const preview = to * track;

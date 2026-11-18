@@ -86,28 +86,22 @@
   touch-action: none;
 }
 
-.cc-split[data-dragging] {
+.cc-split[data-drag] {
   cursor: grabbing;
 }
 
-/* A rounded bar in the middle of the grip, shown on hover and while dragged. */
+/* A `4px` by `32px` bar in the middle of the grip, on hover and while dragged. */
 .cc-split::before {
-  opacity: 0;
-  transition: opacity var(--cc-ease);
   content: '';
   position: absolute;
-  top: 50%;
-  left: 3px;
-  width: 4px;
-  height: 32px;
-  margin-top: -16px;
+  inset: calc(50% - 16px) 3px;
   border-radius: 2px;
   background: var(--cc-disabled);
+  transition: opacity var(--cc-ease);
 }
 
-.cc-split:hover::before,
-.cc-split[data-dragging]::before {
-  opacity: 1;
+.cc-split:not(:hover, [data-drag])::before {
+  opacity: 0;
 }
 
 /*
