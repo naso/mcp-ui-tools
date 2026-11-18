@@ -55,7 +55,7 @@ Every package shares a version.
 2. `pnpm build && pnpm test`
 3. `pnpm --filter @fabiocv/component-code publish` and
    `pnpm --filter "./tools/*" publish`, which skips the private core.
-4. `pnpm --filter site deploy` publishes the website, the hosted MCP Apps and
+4. `pnpm --filter site run deploy` publishes the website, the hosted MCP Apps and
    the gallery's API to Cloudflare Workers, and brings the gallery's database
    up to date. The first deploy makes its R2 bucket and D1 database.
 
