@@ -89,3 +89,11 @@ it('makes the values named in controls changeable', () => {
   });
   expect(host.querySelector('.cc-changed')).not.toBeNull();
 });
+
+it('hides the file tabs with tabs={false}, and names the preview with title', () => {
+  act(() => root.render(<ComponentCode files={FILES} title="Waves" />));
+  expect(host.querySelector('.cc > .cc-tab')!.textContent).toBe('Waves');
+  act(() => root.render(<ComponentCode files={FILES} tabs={false} />));
+  expect(tabs()).toEqual([]);
+  expect(host.querySelector('.cc > .cc-tab')).toBeNull();
+});

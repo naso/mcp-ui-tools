@@ -6,7 +6,7 @@ import { readFile, rm, writeFile } from 'node:fs/promises';
 import { brotliCompressSync, gzipSync } from 'node:zlib';
 import { build, context, transform } from 'esbuild';
 
-const LIMIT = 23 * 1024;
+const LIMIT = 30 * 1024;
 
 const inlineCss = {
   name: 'inline-css',

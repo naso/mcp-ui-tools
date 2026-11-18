@@ -399,7 +399,7 @@ const DAMPING = (4 * Math.PI) / 0.35;
  * pointer; when a side closes, or is let go short of `MIN` and goes to it, a
  * spring takes it from where it was. A double click springs it back to halves.
  */
-function Split() {
+function Split({ start }: { start?: number }) {
   const line = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handle = line.current!;
@@ -407,12 +407,12 @@ function Split() {
     const frame = root.firstElementChild!;
     // Where the line is going, as the preview's share, and how far it is from
     // there, which the spring takes to nothing as the line follows along.
-    let to = 0.5;
+    // Which side is closed: the preview, `-1`, or the code, `1`.
+    let closed = start === undefined ? 0 : start * 2 - 1;
+    let to = start ?? 0.5;
     let off = 0;
     let speed = 0;
     let track = 1;
-    // Which side is closed: the preview, `-1`, or the code, `1`.
-    let closed = 0;
     let grab: number | undefined;
     let last = 0;
     let frameId = 0;
@@ -519,10 +519,26 @@ function Split() {
   return <div ref={line} className="cc-split" aria-hidden />;
 }
 
+/** How the panel is laid out, which both entries take as props. */
+export type Layout = {
+  /** The preview's tab. `Preview` when left out. */
+  title?: string;
+  /** `false` hides the tabs: the preview's and the code's. */
+  tabs?: boolean;
+  /** The side that starts closed, which the line between them opens. */
+  collapsed?: 'preview' | 'code';
+  /** The one side shown, without the other or the line between them. */
+  only?: 'preview' | 'code';
+};
+
 /** The preview beside the code, with the code's tab, copy and reset. */
 export function Panel({
   className,
   theme,
+  title = 'Preview',
+  tabs = true,
+  collapsed,
+  only,
   preview,
   tab,
   source,
@@ -530,7 +546,7 @@ export function Panel({
   note,
   onReset,
   ...code
-}: {
+}: Layout & {
   className?: string;
   theme?: 'light' | 'dark';
   preview: ReactNode;
@@ -543,23 +559,34 @@ export function Panel({
   controls: Control[];
   onChange: (control: Control, value: Value) => void;
 }) {
+  // The preview's share, `0` or `1` with a side closed from the first paint,
+  // before the line takes `--split` over.
+  const start = only || !collapsed ? undefined : +(collapsed === 'code');
   return (
-    <div className={className ? `cc ${className}` : 'cc'} data-theme={theme}>
+    <div
+      className={className ? `cc ${className}` : 'cc'}
+      data-theme={theme}
+      data-tabs={tabs ? undefined : 'hidden'}
+      data-only={only}
+      style={start === undefined ? undefined : ({ '--split': start } as {})}
+    >
       <div className="cc-frame">
-        <div className="cc-preview">{preview}</div>
-        <div className="cc-code" data-note={note}>
-          {tab}
-          <Actions
-            source={source}
-            changed={changed}
-            note={note}
-            onReset={onReset}
-          />
-          <Code source={source} {...code} />
-        </div>
+        {only !== 'code' && <div className="cc-preview">{preview}</div>}
+        {only !== 'preview' && (
+          <div className="cc-code" data-note={note}>
+            {tabs && tab}
+            <Actions
+              source={source}
+              changed={changed}
+              note={note}
+              onReset={onReset}
+            />
+            <Code source={source} {...code} />
+          </div>
+        )}
       </div>
-      <div className="cc-tab">Preview</div>
-      <Split />
+      {tabs && only !== 'code' && <div className="cc-tab">{title}</div>}
+      {!only && <Split start={start} />}
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { base, dedent, Panel, useStyles } from './panel';
 import { CodeError, parse } from './parse';
 import { render, SETTERS } from './run';
 import type { Control, ControlOptions } from './controls';
+import type { Layout } from './panel';
 import type { Scope } from './run';
 
 /**
@@ -38,31 +39,32 @@ export type ComponentCodeProps = {
   /** A line from an info icon beside reset, once the reader changes a value. */
   note?: string;
   className?: string;
-} & (
-  | {
-      /**
-       * What the code can name. With it, the preview is the code itself,
-       * rendered: elements, props, text, strings, numbers, booleans, lists,
-       * objects and these names.
-       */
-      scope: Scope;
-      /** Makes each value in the code a control the reader can change. */
-      interactive?: boolean;
-      /** How a prop is changed, by its name or by `Element.prop`. */
-      controls?: Readonly<Record<string, ControlOptions>>;
-      /** Called as the reader changes a prop. */
-      onChange?: (change: ComponentCodeChange) => void;
-      children?: undefined;
-    }
-  | {
-      /** The preview, for code that cannot run from its text, such as a hook. */
-      children: ReactNode;
-      scope?: undefined;
-      interactive?: undefined;
-      controls?: undefined;
-      onChange?: undefined;
-    }
-);
+} & Layout &
+  (
+    | {
+        /**
+         * What the code can name. With it, the preview is the code itself,
+         * rendered: elements, props, text, strings, numbers, booleans, lists,
+         * objects and these names.
+         */
+        scope: Scope;
+        /** Makes each value in the code a control the reader can change. */
+        interactive?: boolean;
+        /** How a prop is changed, by its name or by `Element.prop`. */
+        controls?: Readonly<Record<string, ControlOptions>>;
+        /** Called as the reader changes a prop. */
+        onChange?: (change: ComponentCodeChange) => void;
+        children?: undefined;
+      }
+    | {
+        /** The preview, for code that cannot run from its text, such as a hook. */
+        children: ReactNode;
+        scope?: undefined;
+        interactive?: undefined;
+        controls?: undefined;
+        onChange?: undefined;
+      }
+  );
 
 type BoundaryProps = { source: string; children: ReactNode };
 type BoundaryState = { source?: string; problem?: string };
@@ -108,6 +110,7 @@ export function ComponentCode({
   controls: options,
   onChange,
   children,
+  ...layout
 }: ComponentCodeProps) {
   useStyles('component-code', styles);
 
@@ -165,6 +168,7 @@ export function ComponentCode({
     <Panel
       className={className}
       theme={theme}
+      {...layout}
       preview={
         problem ? (
           <p className="cc-problem">{problem}</p>

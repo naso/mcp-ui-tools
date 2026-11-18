@@ -40,6 +40,10 @@ The component adds its own stylesheet, so there is nothing else to import.
 | `onChange`    | Called with `{ prop, value, code }` as the reader changes a value.                                        |
 | `children`    | The preview, for code that cannot run from its text, such as code with a hook. Use it instead of `scope`. |
 | `file`        | The file named in the code's tab. `Code` when left out.                                                   |
+| `title`       | The preview's tab. `Preview` when left out.                                                               |
+| `tabs`        | `false` hides the tabs: the preview's and the code's.                                                     |
+| `collapsed`   | `preview` or `code`: that side starts closed, and dragging the line between them opens it.                |
+| `only`        | `preview` or `code`: shows that side alone, without the other or the line between them.                   |
 | `theme`       | `light` or `dark`. Without it, the page's `color-scheme` decides.                                         |
 | `note`        | A line shown from an info icon beside reset, once the reader changes a value.                             |
 | `className`   | A class for the outer element.                                                                            |
@@ -144,6 +148,10 @@ import { ComponentCode } from '@fabiocv/component-code/html';
 | `controls`  | The values the reader can change, by name. Each takes `true`, a list of options, or `{ min, max, step }`. |
 | `onChange`  | Called with `{ file, prop, value, code }` as the reader changes a value.                                  |
 | `theme`     | `light` or `dark`. Without it, the page's `color-scheme` decides, and the frame takes the same.           |
+| `title`     | The preview's tab. `Preview` when left out.                                                               |
+| `tabs`      | `false` hides the tabs: the preview's and the files'.                                                     |
+| `collapsed` | `preview` or `code`: that side starts closed, and dragging the line between them opens it.                |
+| `only`      | `preview` or `code`: shows that side alone, without the other or the line between them.                   |
 | `note`      | A line shown from an info icon beside reset, once the reader changes a value.                             |
 | `className` | A class for the outer element.                                                                            |
 

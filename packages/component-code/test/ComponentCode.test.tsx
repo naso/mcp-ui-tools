@@ -234,3 +234,42 @@ it('moves through a menu of options from the keyboard', () => {
   press('Escape');
   expect(document.activeElement).toBe(value);
 });
+
+it('names the preview with title, and hides the tabs with tabs={false}', () => {
+  show(
+    <ComponentCode
+      file="Badge.tsx"
+      title="Example"
+      code="<b>Hi</b>"
+      scope={{}}
+    />,
+  );
+  const tabs = () =>
+    [...host.querySelectorAll('.cc-tab:not(.cc-actions)')].map(
+      (tab) => tab.textContent,
+    );
+  expect(tabs()).toEqual(['Badge.tsx', 'Example']);
+  show(<ComponentCode tabs={false} code="<b>Hi</b>" scope={{}} />);
+  expect(tabs()).toEqual([]);
+  expect(host.querySelector('.cc-actions')).not.toBeNull();
+});
+
+it('shows one side alone with only', () => {
+  show(<ComponentCode only="preview" code="<b>Hi</b>" scope={{}} />);
+  expect(preview()).toBe('Hi');
+  expect(host.querySelector('.cc-code')).toBeNull();
+  expect(host.querySelector('.cc-split')).toBeNull();
+  show(<ComponentCode only="code" code="<b>Hi</b>" scope={{}} />);
+  expect(host.querySelector('.cc-preview')).toBeNull();
+  expect(code()).toBe('<b>Hi</b>');
+  expect(host.textContent).not.toContain('Preview');
+});
+
+it('starts with a side closed with collapsed', () => {
+  show(<ComponentCode collapsed="preview" code="<b>Hi</b>" scope={{}} />);
+  const panel = host.querySelector<HTMLElement>('.cc')!;
+  expect(panel.style.getPropertyValue('--split')).toBe('0');
+  expect(host.querySelector('.cc-split')).not.toBeNull();
+  show(<ComponentCode collapsed="code" code="<b>Hi</b>" scope={{}} />);
+  expect(panel.style.getPropertyValue('--split')).toBe('1');
+});

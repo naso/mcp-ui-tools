@@ -190,6 +190,15 @@
   .cc-split {
     display: block;
   }
+
+  /* One side alone takes the whole width, its tab uncut. */
+  .cc[data-only] > .cc-frame {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cc[data-only] > .cc-tab {
+    clip-path: none;
+  }
 }
 
 /* The component on the frame's surface, a tab's height down. */
@@ -198,6 +207,15 @@
   place-items: center;
   min-width: 0;
   padding: 48px 24px 24px;
+}
+
+/* Without tabs, nothing holds the top a tab's height down. */
+.cc[data-tabs='hidden'] .cc-preview {
+  padding-top: 24px;
+}
+
+.cc[data-tabs='hidden'] .cc-code {
+  padding-top: 0;
 }
 
 .cc-problem {

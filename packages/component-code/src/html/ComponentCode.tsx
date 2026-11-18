@@ -5,6 +5,7 @@ import { runner } from './frame';
 import { edit, languageOf, read } from './languages';
 import type { Controls, Language } from './languages';
 import type { Runner } from './frame';
+import type { Layout } from '../panel';
 
 import css from './styles.css?inline';
 
@@ -45,7 +46,7 @@ export type ComponentCodeProps = {
   /** A line from an info icon beside reset, once the reader changes a value. */
   note?: string;
   className?: string;
-};
+} & Layout;
 
 /** The files of one language, as one. */
 const join = (files: Record<string, string>, language: Language) =>
@@ -120,6 +121,7 @@ export function ComponentCode({
   theme,
   note,
   className,
+  ...layout
 }: ComponentCodeProps) {
   useStyles('component-code-html', styles);
 
@@ -145,6 +147,7 @@ export function ComponentCode({
     <Panel
       className={className}
       theme={theme}
+      {...layout}
       preview={
         <Run
           html={join(sources, 'html')}
