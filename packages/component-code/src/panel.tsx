@@ -393,11 +393,11 @@ const DAMPING = (4 * Math.PI) / 0.35;
 /**
  * The line between the preview and its code, dragged to share the width as
  * `--split`, the preview's share. Past `MIN` a side resists, easing more the
- * closer it gets to the edge, and `CLOSE` past it the side closes. A side
- * dragged open from closed follows the pointer without resisting until it
- * reaches `MIN`. The line follows the pointer; when a side closes or opens, or
- * is let go short of `MIN` and goes to it, a spring takes it from where it
- * was. A double click springs it back to halves.
+ * closer it gets to the edge, and `CLOSE` past it the side closes. A closed
+ * side, before the drag or during it, opens with the pointer as soon as it
+ * turns back, without resisting until it reaches `MIN`. The line follows the
+ * pointer; when a side closes, or is let go short of `MIN` and goes to it, a
+ * spring takes it from where it was. A double click springs it back to halves.
  */
 function Split() {
   const line = useRef<HTMLDivElement>(null);
@@ -413,8 +413,6 @@ function Split() {
     let track = 1;
     // Which side is closed: the preview, `-1`, or the code, `1`.
     let closed = 0;
-    // Whether the closed side is being dragged open.
-    let opening = false;
     let grab: number | undefined;
     let last = 0;
     let frameId = 0;
@@ -446,12 +444,11 @@ function Split() {
       }
     };
     // A side `wanted` wide: resisting under `MIN`, and closed `CLOSE` past it.
-    // Once closed, it opens again `16px` further out, so it does not flicker.
-    const ease = (wanted: number, shut: boolean) => {
+    const ease = (wanted: number) => {
       const over = MIN - wanted;
       return over <= 0
         ? wanted
-        : over > CLOSE - (shut ? 16 : 0)
+        : over > CLOSE
           ? 0
           : MIN - GIVE * (1 - Math.exp(-over / GIVE));
     };
@@ -462,38 +459,43 @@ function Split() {
       // The frame's width less its padding and the gap.
       track = frame.clientWidth - 6;
       grab = event.clientX - to * track;
-      opening = !!closed;
     };
     handle.onpointermove = (event) => {
       if (grab === undefined) return;
-      const wanted = event.clientX - grab;
-      if (opening) {
-        opening = (closed < 0 ? wanted : track - wanted) < MIN;
-        if (opening) {
-          to = Math.min(1, Math.max(0, wanted / track));
+      let wanted = event.clientX - grab;
+      if (closed) {
+        // Pushed past the edge, a closed side stays there, so it opens as
+        // soon as the pointer turns back.
+        const past =
+          closed < 0 ? Math.min(wanted, 0) : Math.max(wanted - track, 0);
+        grab += past;
+        wanted -= past;
+        if ((closed < 0 ? wanted : track - wanted) < MIN) {
+          to = wanted / track;
           show();
           return;
         }
         closed = 0;
       }
-      const preview = ease(wanted, closed < 0);
-      const code = ease(track - wanted, closed > 0);
-      const next = (preview === wanted ? track - code : preview) / track;
-      const was = closed;
+      const preview = ease(wanted);
+      const code = ease(track - wanted);
       closed = preview ? (code ? 0 : 1) : -1;
-      if (closed === was) to = next;
-      else jump(next);
+      if (closed) {
+        // It closes with a spring, and opens again from where the pointer is.
+        jump(closed < 0 ? 0 : 1);
+        grab = event.clientX - to * track;
+      } else to = (preview === wanted ? track - code : preview) / track;
       show();
     };
     handle.onpointerup = handle.onpointercancel = () => {
       if (grab === undefined) return;
       grab = undefined;
-      // A side let go short of `MIN` goes to it, unless it was opening and is
-      // short of where it would close, when it closes again.
+      // A side let go short of `MIN` goes to it, unless it was closed and is
+      // still short of where it would close, when it closes again.
       const preview = to * track;
       const side = Math.min(preview, track - preview);
-      if (opening && side < MIN - CLOSE) jump(closed < 0 ? 0 : 1);
-      else if (side < MIN && (opening || !closed)) {
+      if (closed && side < MIN - CLOSE) jump(closed < 0 ? 0 : 1);
+      else if (side < MIN) {
         closed = 0;
         jump((preview < MIN ? MIN : track - MIN) / track);
       }
