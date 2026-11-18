@@ -109,9 +109,12 @@ const MOST = 1.8e6;
 function Tip({
   label,
   shortcut,
+  side = 'right',
   children,
 }: {
   label: string;
+  /** The side of the button it shows on. */
+  side?: 'right' | 'top';
   /** The key that does the same, shown after the name. */
   shortcut?: string;
   children: ReactElement;
@@ -120,7 +123,7 @@ function Tip({
     <Tooltip.Root>
       <Tooltip.Trigger render={children} />
       <Tooltip.Portal>
-        <Tooltip.Positioner side="right" sideOffset={8} className="tip-place">
+        <Tooltip.Positioner side={side} sideOffset={8} className="tip-place">
           <Tooltip.Popup className="tip">
             {label}
             {shortcut && <kbd>{shortcut}</kbd>}
@@ -231,18 +234,33 @@ export function Wall({ compact = false }: { compact?: boolean }) {
     };
   }, []);
 
-  // On the compact wall, a tool's key picks it, unless a modifier is held or
-  // a field has the keys.
+  /**
+   * On the compact wall, a tool's key picks it and a number puts that stencil
+   * down, unless a modifier is held or a field has the keys. Set after each
+   * render, so it puts a stencil down by the sheets as they are.
+   */
+  const keys = useRef<(event: KeyboardEvent) => void>(undefined);
   useEffect(() => {
-    if (!compact) return;
-    const pick = (event: KeyboardEvent) => {
+    keys.current = (event) => {
       if (event.metaKey || event.ctrlKey || event.altKey) return;
       if ((event.target as Element).closest?.('input, textarea')) return;
       const found = TOOLS.find(({ key }) => key === event.key.toUpperCase());
+      const kind = Number(event.key) - 1;
       if (found) setTool(found.id);
+      else if (kind >= 0 && kind < STENCILS.length) add(kind);
+      else return;
+      // A button clicked before keeps the focus, and a key shows its ring;
+      // the bar gives it up, as the pick is the key's, not the button's.
+      const focused = document.activeElement;
+      if (focused instanceof HTMLElement && focused.closest('.bar'))
+        focused.blur();
     };
-    window.addEventListener('keydown', pick);
-    return () => window.removeEventListener('keydown', pick);
+  });
+  useEffect(() => {
+    if (!compact) return;
+    const press = (event: KeyboardEvent) => keys.current?.(event);
+    window.addEventListener('keydown', press);
+    return () => window.removeEventListener('keydown', press);
   }, [compact]);
 
   // The paint follows the sheets: where each lies, and which are there.
@@ -510,17 +528,27 @@ export function Wall({ compact = false }: { compact?: boolean }) {
 
   const stencils = (
     <div className="picks" ref={tray} role="group" aria-label="Stencils">
-      {STENCILS.map(({ name, Shape }, kind) => (
-        <button
-          key={name}
-          type="button"
-          className="pick pick-stencil"
-          aria-label={`Put the ${name} stencil on the wall`}
-          onClick={() => add(kind)}
-        >
-          <Shape size={compact ? 20 : 28} />
-        </button>
-      ))}
+      {STENCILS.map(({ name, Shape }, kind) => {
+        const button = (
+          <button
+            key={name}
+            type="button"
+            className="pick pick-stencil"
+            aria-label={`Put the ${name} stencil on the wall`}
+            aria-keyshortcuts={compact ? String(kind + 1) : undefined}
+            onClick={() => add(kind)}
+          >
+            <Shape size={compact ? 20 : 28} />
+          </button>
+        );
+        return compact ? (
+          <Tip key={name} label={name} shortcut={String(kind + 1)} side="top">
+            {button}
+          </Tip>
+        ) : (
+          button
+        );
+      })}
     </div>
   );
 
@@ -668,7 +696,9 @@ export function Wall({ compact = false }: { compact?: boolean }) {
             </div>
           </Tooltip.Provider>
           <div className="bar bar-right">{cans}</div>
-          <div className="bar bar-bottom">{stencils}</div>
+          <Tooltip.Provider>
+            <div className="bar bar-bottom">{stencils}</div>
+          </Tooltip.Provider>
         </>
       ) : (
         <div className="kit">

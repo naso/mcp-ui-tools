@@ -1891,12 +1891,12 @@ footer a:hover {
 }
 
 /*
- * Lift, under the sheet in hand, upright however the sheet is turned, on the
- * bars' colour.
+ * Lift, inside the sheet in hand along its bottom edge, upright however the
+ * sheet is turned, on the bars' colour.
  */
 .sheet-lift {
   position: absolute;
-  top: calc(100% + 12px);
+  bottom: 8px;
   left: 50%;
   translate: -50% 0;
   height: 24px;
