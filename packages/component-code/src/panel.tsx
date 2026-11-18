@@ -393,10 +393,11 @@ const DAMPING = (4 * Math.PI) / 0.35;
 /**
  * The line between the preview and its code, dragged to share the width as
  * `--split`, the preview's share. Past `MIN` a side resists, easing more the
- * closer it gets to the edge, and `CLOSE` past it the side closes. The line
- * follows the pointer; when a side closes or opens, or is let go while
- * resisting and goes back to `MIN`, a spring takes it from where it was. A
- * double click springs it back to halves.
+ * closer it gets to the edge, and `CLOSE` past it the side closes. A side
+ * dragged open from closed follows the pointer without resisting until it
+ * reaches `MIN`. The line follows the pointer; when a side closes or opens, or
+ * is let go short of `MIN` and goes to it, a spring takes it from where it
+ * was. A double click springs it back to halves.
  */
 function Split() {
   const line = useRef<HTMLDivElement>(null);
@@ -412,6 +413,8 @@ function Split() {
     let track = 1;
     // Which side is closed: the preview, `-1`, or the code, `1`.
     let closed = 0;
+    // Whether the closed side is being dragged open.
+    let opening = false;
     let grab: number | undefined;
     let last = 0;
     let frameId = 0;
@@ -459,10 +462,20 @@ function Split() {
       // The frame's width less its padding and the gap.
       track = frame.clientWidth - 6;
       grab = event.clientX - to * track;
+      opening = !!closed;
     };
     handle.onpointermove = (event) => {
       if (grab === undefined) return;
       const wanted = event.clientX - grab;
+      if (opening) {
+        opening = (closed < 0 ? wanted : track - wanted) < MIN;
+        if (opening) {
+          to = Math.min(1, Math.max(0, wanted / track));
+          show();
+          return;
+        }
+        closed = 0;
+      }
       const preview = ease(wanted, closed < 0);
       const code = ease(track - wanted, closed > 0);
       const next = (preview === wanted ? track - code : preview) / track;
@@ -475,9 +488,13 @@ function Split() {
     handle.onpointerup = handle.onpointercancel = () => {
       if (grab === undefined) return;
       grab = undefined;
-      // A side let go while resisting goes back to `MIN`.
+      // A side let go short of `MIN` goes to it, unless it was opening and is
+      // short of where it would close, when it closes again.
       const preview = to * track;
-      if (!closed && Math.min(preview, track - preview) < MIN) {
+      const side = Math.min(preview, track - preview);
+      if (opening && side < MIN - CLOSE) jump(closed < 0 ? 0 : 1);
+      else if (side < MIN && (opening || !closed)) {
+        closed = 0;
         jump((preview < MIN ? MIN : track - MIN) / track);
       }
     };
