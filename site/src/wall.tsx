@@ -533,3 +533,12 @@ export function Wall() {
     </div>
   );
 }
+
+/** The wall alone, filling the page, for X to play inside a post. */
+export function WallPage() {
+  return (
+    <main className="player">
+      <Wall />
+    </main>
+  );
+}

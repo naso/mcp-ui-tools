@@ -1801,3 +1801,29 @@ footer a:hover {
   opacity: 0;
   cursor: pointer;
 }
+
+/*
+ * The wall alone, as X plays it inside a post: it fills the frame X gives it,
+ * the wall taking what the kit leaves, and the page never scrolls.
+ */
+html:has(.player) {
+  overflow: hidden;
+  scrollbar-gutter: auto;
+  overscroll-behavior: none;
+}
+
+.player {
+  display: grid;
+  height: 100dvh;
+}
+
+.player .wall {
+  grid-template-rows: 1fr auto;
+  border-radius: 0;
+  outline: none;
+}
+
+.player .wall-face {
+  height: auto;
+  min-height: 160px;
+}

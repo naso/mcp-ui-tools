@@ -5,7 +5,7 @@ import { ComponentCodeLogo, HomeLogo, OrbitLogo } from './logos';
 export const SITE = 'https://mcp-ui-tools.fabio.cv';
 export const GITHUB = 'https://github.com/naso/mcp-ui-tools';
 
-export type PageId = 'home' | 'component-code' | 'orbit' | 'brand';
+export type PageId = 'home' | 'component-code' | 'orbit' | 'brand' | 'wall';
 
 export type Page = {
   id: PageId;
@@ -19,6 +19,10 @@ export type Page = {
   icon: string;
   /** The `CHANGELOG.md` sections the page shows. All of them when left out. */
   packages?: string[];
+  /** A page that plays inside a post on X, as a player card, and its size. */
+  player?: { path: string; width: number; height: number };
+  /** Kept out of search and the sitemap. */
+  hidden?: boolean;
 };
 
 export const HOME: Page = {
@@ -55,21 +59,35 @@ export const TOOLS: Page[] = [
   },
 ];
 
+const BRAND_SUMMARY =
+  'The stencils and the spray paint the site is drawn with, to paint with yourself.';
+
 /** The brand, to paint with. It has the home page's logo, and no menu lists it. */
 export const BRAND: Page = {
   id: 'brand',
   name: 'Brand',
   path: '/brand/',
-  summary:
-    'The stencils and the spray paint the site is drawn with, to paint with yourself.',
+  summary: BRAND_SUMMARY,
   Logo: HomeLogo,
   icon: '/favicon.svg',
+  player: { path: '/brand/wall/', width: 600, height: 800 },
+};
+
+/** The wall alone, filling its frame, for X to show inside a post. */
+export const WALL: Page = {
+  id: 'wall',
+  name: 'Wall',
+  path: '/brand/wall/',
+  summary: BRAND_SUMMARY,
+  Logo: HomeLogo,
+  icon: '/favicon.svg',
+  hidden: true,
 };
 
 /** The pages the menu lists: the home page and each tool. */
 export const MENU = [HOME, ...TOOLS];
 
-export const PAGES = [...MENU, BRAND];
+export const PAGES = [...MENU, WALL, BRAND];
 
 /** The page at a path, or home. */
 export const pageAt = (path: string) =>
