@@ -89,8 +89,8 @@
 /*
  * Side by side, the preview takes `--split` of the width, which the line
  * between them drags. Each side clips what it holds as it narrows: the
- * preview and its tab where the preview ends, and the code at its right, so
- * its tabs still reach the frame.
+ * preview and its tab where the preview ends, the tab gone with the preview,
+ * and the code at its right, so its tabs still reach the frame.
  */
 @container (min-width: 640px) {
   .cc-frame {
@@ -109,7 +109,9 @@
   }
 
   .cc > .cc-tab {
-    clip-path: inset(-1px calc(100% - var(--edge)) -6px -1px);
+    clip-path: inset(
+      -1px calc(100% + 2px - var(--edge) - var(--seam)) -6px -1px
+    );
   }
 
   .cc-split {
