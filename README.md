@@ -41,6 +41,9 @@ built view under the default security policy of MCP Apps and sends it a tool
 call: Component Code at `/` and Orbit at `/orbit.html`. Build the packages first
 with `pnpm build`.
 
+`pnpm --filter @fabiocv/component-code dev` rebuilds the package's `dist/` on
+every change, for an app that links to this checkout.
+
 Both entries, `@fabiocv/component-code` and `@fabiocv/component-code/html`, must
 stay under 22 kB minified, each counted with the chunk they share. The build
 fails past that and writes their sizes to `dist/size.json`, which the website
