@@ -9,6 +9,11 @@
  *
  * A drawing shows as soon as it is saved. `pnpm --filter site hide <id>`
  * takes one out of the gallery and stops its image being served.
+ *
+ * Its limits keep it inside Cloudflare's free allowances however many come:
+ * images of a megabyte at most, 5 GB of them in all, a thousand saves a day,
+ * images kept at the edge so viewing them seldom reads R2, and one address
+ * held back when it asks too fast.
  */
 
 /** What the API uses of R2, D1 and the rate limiter. */
@@ -32,18 +37,32 @@ type Limiter = {
   limit(options: { key: string }): Promise<{ success: boolean }>;
 };
 
+/** What the Worker is given to finish work after it has answered. */
+type Context = { waitUntil(promise: Promise<unknown>): void };
+
 export type Env = {
   DB: { prepare(query: string): Statement };
   DRAWINGS: Bucket;
   /** How often one address may save. Left out, it may save as often as it likes. */
   SAVES?: Limiter;
+  /** How often one address may read the gallery, likewise. */
+  READS?: Limiter;
 };
 
 /** A drawing as the gallery lists it. */
 export type Drawing = { id: string; name: string; created: number };
 
-/** The most an image may weigh, in bytes. */
-const HEAVIEST = 2_000_000;
+/** The most an image may weigh, in bytes. A saved wall weighs about 60 kB. */
+export const HEAVIEST = 1_000_000;
+
+/** The most the images may weigh in all: half of R2's free 10 GB. */
+const STORE = 5_000_000_000;
+
+/** The most drawings the gallery takes in a day, from everyone. */
+const DAILY = 1_000;
+
+/** How long the edge keeps an image, in seconds, so one hidden soon goes. */
+const KEPT = 3600;
 
 /** The longest name, in characters. */
 export const LONGEST_NAME = 40;
@@ -116,10 +135,10 @@ async function list(url: URL, env: Env) {
   const count = before
     ? undefined
     : (
-        await env.DB.prepare(
-          'SELECT COUNT(*) AS count FROM drawings WHERE hidden = 0',
-        ).first<{ count: number }>()
-      )?.count;
+        await env.DB.prepare('SELECT shown FROM totals WHERE id = 1').first<{
+          shown: number;
+        }>()
+      )?.shown;
   return json({
     drawings,
     next: results.length > PAGE && last ? `${last.created}.${last.id}` : null,
@@ -152,24 +171,49 @@ async function save(request: Request, env: Env) {
   const type = typeOf(new Uint8Array(bytes).subarray(0, 12));
   if (!type) return fail(415, 'The drawing must be a PNG, JPEG or WebP.');
 
-  const id = crypto.randomUUID().replaceAll('-', '').slice(0, 16);
   const created = Date.now();
+  const [held, today] = await Promise.all([
+    env.DB.prepare('SELECT bytes FROM totals WHERE id = 1').first<{
+      bytes: number;
+    }>(),
+    env.DB.prepare('SELECT COUNT(*) AS saved FROM drawings WHERE created > ?1')
+      .bind(created - 86_400_000)
+      .first<{ saved: number }>(),
+  ]);
+  if ((held?.bytes ?? 0) + bytes.byteLength > STORE)
+    return fail(507, 'The gallery is full for now.');
+  if ((today?.saved ?? 0) >= DAILY)
+    return fail(429, 'The gallery has taken all it can today. Try tomorrow.');
+
+  const id = crypto.randomUUID().replaceAll('-', '').slice(0, 16);
   await env.DRAWINGS.put(`drawings/${id}`, bytes, {
     httpMetadata: { contentType: type },
   });
   await env.DB.prepare(
-    'INSERT INTO drawings (id, name, type, created) VALUES (?1, ?2, ?3, ?4)',
+    'INSERT INTO drawings (id, name, type, created, size) VALUES (?1, ?2, ?3, ?4, ?5)',
   )
-    .bind(id, name, type, created)
+    .bind(id, name, type, created, bytes.byteLength)
     .run();
   return json({ id, name, created } satisfies Drawing, 201);
 }
 
-/** A drawing's image, unless it has been hidden. */
-async function image(id: string, env: Env) {
+/** The cache at the edge the Worker runs on, where Cloudflare has one. */
+const edge = () =>
+  (globalThis.caches as unknown as { default?: Cache } | undefined)?.default;
+
+/**
+ * A drawing's image, unless it has been hidden: from the edge when it has it,
+ * so R2 and D1 are read only once an hour wherever it is viewed.
+ */
+async function image(id: string, url: URL, env: Env, context?: Context) {
   const missing = () =>
     new Response('Not found', { status: 404, headers: OPEN });
   if (!ID.test(id)) return missing();
+  const cache = edge();
+  const key = new Request(`${url.origin}/api/drawings/${id}`);
+  const kept = await cache?.match(key);
+  if (kept) return kept;
+
   const row = await env.DB.prepare(
     'SELECT type FROM drawings WHERE id = ?1 AND hidden = 0',
   )
@@ -177,24 +221,37 @@ async function image(id: string, env: Env) {
     .first<{ type: string }>();
   const object = row && (await env.DRAWINGS.get(`drawings/${id}`));
   if (!row || !object) return missing();
-  return new Response(object.body, {
+  const response = new Response(object.body, {
     headers: {
       ...OPEN,
       'content-type': row.type,
       'x-content-type-options': 'nosniff',
       // Not for long, so one that is hidden soon stops showing.
-      'cache-control': 'public, max-age=3600',
+      'cache-control': `public, max-age=${KEPT}`,
     },
   });
+  if (cache) {
+    const keeping = cache.put(key, response.clone());
+    if (context) context.waitUntil(keeping);
+    else await keeping;
+  }
+  return response;
 }
 
 /** Answers the paths under `/api/drawings`. */
-export function drawings(request: Request, env: Env) {
+export async function drawings(request: Request, env: Env, context?: Context) {
   const url = new URL(request.url);
   const id = url.pathname.split('/')[3];
+  const address = request.headers.get('cf-connecting-ip') ?? 'local';
+  if (
+    request.method === 'GET' &&
+    env.READS &&
+    !(await env.READS.limit({ key: address })).success
+  )
+    return fail(429, 'Too many at once. Try again in a minute.');
   if (id === undefined || id === '') {
     if (request.method === 'GET') return list(url, env);
     if (request.method === 'POST') return save(request, env);
-  } else if (request.method === 'GET') return image(id, env);
+  } else if (request.method === 'GET') return image(id, url, env, context);
   return fail(405, 'Not something the gallery does.');
 }

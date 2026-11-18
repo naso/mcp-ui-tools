@@ -8,6 +8,7 @@ import type {
   ReactNode,
 } from 'react';
 
+import { HEAVIEST } from './drawings';
 import { Gallery, imageOf, SavePopup } from './gallery';
 import type { Drawing } from './drawings';
 import { rgb } from './graffiti';
@@ -519,7 +520,8 @@ export function Wall({
   /**
    * The wall as it looks, for the gallery: its paint, with the sheets still
    * on it, at `DENSITY` pixels to a CSS pixel. WebP where the browser saves
-   * it, and JPEG where it doesn't.
+   * it, and JPEG where it doesn't, a little rougher each time until it is
+   * light enough for the gallery to take.
    */
   const picture = async () => {
     const box = face.current!;
@@ -559,11 +561,15 @@ export function Wall({
       );
       ctx.restore();
     }
-    const encode = (type: string) =>
-      new Promise<Blob | null>((done) => canvas.toBlob(done, type, 0.9));
-    const webp = await encode('image/webp');
-    const image =
-      webp?.type === 'image/webp' ? webp : await encode('image/jpeg');
+    const encode = (type: string, quality: number) =>
+      new Promise<Blob | null>((done) => canvas.toBlob(done, type, quality));
+    let image = await encode('image/webp', 0.9);
+    const type = image?.type === 'image/webp' ? image.type : 'image/jpeg';
+    if (type === 'image/jpeg') image = await encode(type, 0.9);
+    for (const quality of [0.8, 0.65, 0.5]) {
+      if (!image || image.size <= HEAVIEST) break;
+      image = await encode(type, quality);
+    }
     if (!image) throw new Error('The wall could not be saved as an image.');
     return image;
   };
