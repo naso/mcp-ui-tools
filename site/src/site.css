@@ -1890,6 +1890,20 @@ footer a:hover {
   }
 }
 
+/*
+ * Lift, under the sheet in hand, upright however the sheet is turned, on the
+ * bars' colour.
+ */
+.sheet-lift {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 50%;
+  translate: -50% 0;
+  height: 24px;
+  background: var(--sunken);
+  font-size: 12px;
+}
+
 /* The left bar is as thin as its icons. */
 .bar-left .pick {
   width: 28px;
@@ -1902,6 +1916,8 @@ footer a:hover {
 }
 
 .tip {
+  display: flex;
+  gap: 8px;
   padding: 2px 8px;
   border-radius: var(--corner-inner);
   background: var(--surface);
@@ -1921,6 +1937,12 @@ footer a:hover {
 .tip[data-ending-style] {
   opacity: 0;
   scale: 0.96;
+}
+
+/* The key that does the same, after the name, in the muted colour. */
+.tip kbd {
+  color: var(--muted);
+  font: inherit;
 }
 
 /* Moving between buttons, the name changes without fading. */

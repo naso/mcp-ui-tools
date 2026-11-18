@@ -33,18 +33,19 @@ const icon = (path: ReactNode) => (
   </svg>
 );
 
-const TOOLS: { id: Tool; name: string; icon: ReactNode }[] = [
+/** Each tool, with the key that picks it: V for Move, as in Figma. */
+const TOOLS: { id: Tool; name: string; key: string; icon: ReactNode }[] = [
   {
     id: 'move',
     name: 'Move',
-    // Arrows out to each side.
-    icon: icon(
-      <path d="M10 3v14M3 10h14M10 3 8 5M10 3l2 2M10 17l-2-2M10 17l2-2M3 10l2-2M3 10l2 2M17 10l-2-2M17 10l-2 2" />,
-    ),
+    key: 'V',
+    // The pointer's arrow.
+    icon: icon(<path d="M5.5 3.5v12l3.2-3.1 2.3 5 2-.9-2.3-5h4.5z" />),
   },
   {
     id: 'spray',
     name: 'Spray',
+    key: 'S',
     // A can, its nozzle, and the paint leaving it.
     icon: icon(
       <>
@@ -57,6 +58,7 @@ const TOOLS: { id: Tool; name: string; icon: ReactNode }[] = [
   {
     id: 'smudge',
     name: 'Smudge',
+    key: 'M',
     // A hand, its finger out to smudge with.
     icon: icon(
       <path d="M7.5 11V4a1.5 1.5 0 0 1 3 0v5.5M10.5 9.5V9a1.5 1.5 0 0 1 3 0v1M13.5 10a1.5 1.5 0 0 1 3 0v2.5a5 5 0 0 1-5 5h-1a4.5 4.5 0 0 1-3.4-1.6l-2.7-3.3a1.4 1.4 0 0 1 2.1-1.9l1 1" />,
@@ -104,13 +106,25 @@ const LIFT = 200;
 const MOST = 1.8e6;
 
 /** A name that shows beside its button when the pointer rests on it. */
-function Tip({ label, children }: { label: string; children: ReactElement }) {
+function Tip({
+  label,
+  shortcut,
+  children,
+}: {
+  label: string;
+  /** The key that does the same, shown after the name. */
+  shortcut?: string;
+  children: ReactElement;
+}) {
   return (
     <Tooltip.Root>
       <Tooltip.Trigger render={children} />
       <Tooltip.Portal>
         <Tooltip.Positioner side="right" sideOffset={8} className="tip-place">
-          <Tooltip.Popup className="tip">{label}</Tooltip.Popup>
+          <Tooltip.Popup className="tip">
+            {label}
+            {shortcut && <kbd>{shortcut}</kbd>}
+          </Tooltip.Popup>
         </Tooltip.Positioner>
       </Tooltip.Portal>
     </Tooltip.Root>
@@ -216,6 +230,20 @@ export function Wall({ compact = false }: { compact?: boolean }) {
       theme.removeEventListener('change', tint);
     };
   }, []);
+
+  // On the compact wall, a tool's key picks it, unless a modifier is held or
+  // a field has the keys.
+  useEffect(() => {
+    if (!compact) return;
+    const pick = (event: KeyboardEvent) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if ((event.target as Element).closest?.('input, textarea')) return;
+      const found = TOOLS.find(({ key }) => key === event.key.toUpperCase());
+      if (found) setTool(found.id);
+    };
+    window.addEventListener('keydown', pick);
+    return () => window.removeEventListener('keydown', pick);
+  }, [compact]);
 
   // The paint follows the sheets: where each lies, and which are there.
   useEffect(() => {
@@ -383,13 +411,14 @@ export function Wall({ compact = false }: { compact?: boolean }) {
 
   const tools = (
     <div className="picks" role="group" aria-label="Tool">
-      {TOOLS.map(({ id, name, icon }) =>
+      {TOOLS.map(({ id, name, key, icon }) =>
         compact ? (
-          <Tip key={id} label={name}>
+          <Tip key={id} label={name} shortcut={key}>
             <button
               type="button"
               className="pick"
               aria-label={name}
+              aria-keyshortcuts={key}
               aria-pressed={tool === id}
               onClick={() => setTool(id)}
             >
@@ -603,6 +632,18 @@ export function Wall({ compact = false }: { compact?: boolean }) {
                       className="grip grip-turn"
                       onPointerDown={(event) => grab(event, sheet, 'turn')}
                     />
+                    {/* On the compact wall, Lift is on the sheet in hand. */}
+                    {compact && (
+                      <button
+                        type="button"
+                        className="pick sheet-lift"
+                        style={{ rotate: `${-sheet.angle}rad` }}
+                        onPointerDown={(event) => event.stopPropagation()}
+                        onClick={() => lift(sheet.id)}
+                      >
+                        Lift
+                      </button>
+                    )}
                   </>
                 )}
               </div>
@@ -627,11 +668,7 @@ export function Wall({ compact = false }: { compact?: boolean }) {
             </div>
           </Tooltip.Provider>
           <div className="bar bar-right">{cans}</div>
-          <div className="bar bar-bottom">
-            {stencils}
-            <hr />
-            {liftButton}
-          </div>
+          <div className="bar bar-bottom">{stencils}</div>
         </>
       ) : (
         <div className="kit">
