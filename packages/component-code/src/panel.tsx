@@ -453,7 +453,9 @@ function Split() {
           : MIN - GIVE * (1 - Math.exp(-over / GIVE));
     };
 
+    // Only the main button drags, as another's release can go to a menu.
     handle.onpointerdown = (event) => {
+      if (event.button) return;
       event.preventDefault();
       handle.setPointerCapture(event.pointerId);
       // The frame's width less its padding and the gap.
@@ -462,6 +464,9 @@ function Split() {
     };
     handle.onpointermove = (event) => {
       if (grab === undefined) return;
+      // A release the line never heard of, such as outside the window after
+      // the capture was lost, lets go here instead.
+      if (!(event.buttons & 1)) return release();
       let wanted = event.clientX - grab;
       if (closed) {
         // Pushed past the edge, a closed side stays there, so it opens as
@@ -487,7 +492,7 @@ function Split() {
       } else to = (preview === wanted ? track - code : preview) / track;
       show();
     };
-    handle.onpointerup = handle.onpointercancel = () => {
+    const release = () => {
       if (grab === undefined) return;
       grab = undefined;
       // A side let go short of `MIN` goes to it, unless it was closed and is
@@ -500,6 +505,10 @@ function Split() {
         jump((preview < MIN ? MIN : track - MIN) / track);
       }
     };
+    handle.onpointerup =
+      handle.onpointercancel =
+      handle.onlostpointercapture =
+        release;
     // A double click springs back to halves, opening a closed side.
     handle.ondblclick = () => {
       closed = 0;
