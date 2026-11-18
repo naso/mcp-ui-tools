@@ -380,141 +380,185 @@ function Actions({
   );
 }
 
-/** The width a side keeps while dragged, before it starts to resist. */
-const MIN = 160;
-/** How far a resisting side gives at most, in pixels. */
-const GIVE = 40;
-/** How far past `MIN` the pointer goes before the side closes. */
-const CLOSE = 80;
 /** A critically damped spring that settles in about a third of a second. */
 const STIFFNESS = ((2 * Math.PI) / 0.35) ** 2;
 const DAMPING = (4 * Math.PI) / 0.35;
 
 /**
- * The line between the preview and its code, dragged to share the width as
- * `--split`, the preview's share. Past `MIN` a side resists, easing more the
- * closer it gets to the edge, and `CLOSE` past it the side closes. A closed
- * side, before the drag or during it, opens with the pointer as soon as it
- * turns back, without resisting until it reaches `MIN`. The line follows the
- * pointer; when a side closes, or is let go short of `MIN` and goes to it, a
- * spring takes it from where it was. A double click springs it back to halves.
+ * Where the line is going on one axis, as the preview's share in `prop`, and
+ * how far it is from there, which a spring takes to nothing as the line
+ * follows along. `min` is how long a side keeps while dragged before it
+ * resists; it gives `min / 4` at most, and closes `min / 2` past it. `home` is
+ * where a double click sends it.
+ */
+function motion(root: HTMLElement, prop: string, min: number, start?: number) {
+  const m = {
+    min,
+    // Which side is closed: the preview, `-1`, or the code, `1`.
+    closed: start === undefined ? 0 : start * 2 - 1,
+    to: start ?? 0.5,
+    home: 0.5,
+    off: 0,
+    speed: 0,
+    track: 1,
+    show() {
+      root.style.setProperty(prop, `${Math.min(1, Math.max(0, m.to + m.off))}`);
+    },
+    jump(next: number) {
+      m.off = matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 0
+        : m.off + m.to - next;
+      m.to = next;
+      if (!frame) {
+        last = performance.now();
+        frame = requestAnimationFrame(tick);
+      }
+    },
+    // A side `wanted` long: resisting under `min`, and closed past it.
+    ease(wanted: number) {
+      const over = min - wanted;
+      return over <= 0
+        ? wanted
+        : over > min / 2
+          ? 0
+          : min - (min / 4) * (1 - Math.exp((-4 * over) / min));
+    },
+    stop: () => cancelAnimationFrame(frame),
+  };
+  let last = 0;
+  let frame = 0;
+  const tick = (now: number) => {
+    const time = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    for (let step = 0; step < time; step += 0.001) {
+      m.speed -= (STIFFNESS * m.off + DAMPING * m.speed) * 0.001;
+      m.off += m.speed * 0.001;
+    }
+    if (Math.abs(m.off) * m.track < 0.5) m.off = m.speed = frame = 0;
+    else frame = requestAnimationFrame(tick);
+    m.show();
+  };
+  return m;
+}
+
+/**
+ * The line between the preview and its code. Side by side it shares the width
+ * as `--split`; stacked, the height as `--share`, which the first drag fixes at
+ * what the sides had. Past a side's minimum it resists, easing more the closer
+ * it gets to the edge, and further on that side closes. A closed side, before
+ * the drag or during it, opens with the pointer as soon as it turns back,
+ * without resisting until it reaches the minimum. The line follows the
+ * pointer; when a side closes, or is let go short of its minimum and goes to
+ * it, a spring takes it from where it was. A double click springs it back:
+ * across to halves, and stacked to the heights the sides had.
  */
 function Split({ start }: { start?: number }) {
   const line = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handle = line.current!;
     const root = handle.parentElement!;
-    const frame = root.firstElementChild!;
-    // Where the line is going, as the preview's share, and how far it is from
-    // there, which the spring takes to nothing as the line follows along.
-    // Which side is closed: the preview, `-1`, or the code, `1`.
-    let closed = start === undefined ? 0 : start * 2 - 1;
-    let to = start ?? 0.5;
-    let off = 0;
-    let speed = 0;
-    let track = 1;
+    const frame = root.firstElementChild as HTMLElement;
+    const preview = frame.firstElementChild as HTMLElement;
+    const across = motion(root, '--split', 160, start);
+    const down = motion(root, '--share', 80);
+    let m = across;
     let grab: number | undefined;
-    let last = 0;
-    let frameId = 0;
+    // Stacked, as the stylesheet has it under `640px`.
+    const pick = () => (m = root.clientWidth < 640 ? down : across);
+    const at = (event: PointerEvent) =>
+      m === down ? event.clientY : event.clientX;
 
-    const show = () =>
-      root.style.setProperty(
-        '--split',
-        `${Math.min(1, Math.max(0, to + off))}`,
+    // Until the line is first dragged stacked, it sits where the preview ends.
+    // Some test environments have no `ResizeObserver`.
+    const rest =
+      globalThis.ResizeObserver &&
+      new ResizeObserver(() =>
+        root.style.setProperty(
+          '--rest',
+          `${preview.offsetTop + preview.offsetHeight}px`,
+        ),
       );
-    const tick = (now: number) => {
-      const time = Math.min(0.05, (now - last) / 1000);
-      last = now;
-      for (let step = 0; step < time; step += 0.001) {
-        speed -= (STIFFNESS * off + DAMPING * speed) * 0.001;
-        off += speed * 0.001;
-      }
-      if (Math.abs(off) * track < 0.5) off = speed = frameId = 0;
-      else frameId = requestAnimationFrame(tick);
-      show();
-    };
-    const jump = (next: number) => {
-      off = matchMedia('(prefers-reduced-motion: reduce)').matches
-        ? 0
-        : off + to - next;
-      to = next;
-      if (!frameId) {
-        last = performance.now();
-        frameId = requestAnimationFrame(tick);
-      }
-    };
-    // A side `wanted` wide: resisting under `MIN`, and closed `CLOSE` past it.
-    const ease = (wanted: number) => {
-      const over = MIN - wanted;
-      return over <= 0
-        ? wanted
-        : over > CLOSE
-          ? 0
-          : MIN - GIVE * (1 - Math.exp(-over / GIVE));
-    };
+    rest?.observe(preview);
 
     // Only the main button drags, as another's release can go to a menu.
     handle.onpointerdown = (event) => {
       if (event.button) return;
       event.preventDefault();
       handle.setPointerCapture(event.pointerId);
-      // The frame's width less its padding and the gap.
-      track = frame.clientWidth - 6;
-      grab = event.clientX - to * track;
+      if (pick() === down) {
+        if (!('stack' in root.dataset)) {
+          // The first drag keeps the height the sides had.
+          const stack = frame.clientHeight - 4;
+          down.to = down.home = preview.offsetHeight / (stack - 2);
+          down.show();
+          root.style.setProperty('--stack', `${stack}px`);
+          root.dataset.stack = '';
+        }
+        // The frame's height less its padding and the gap.
+        down.track = frame.clientHeight - 6;
+      } else across.track = frame.clientWidth - 6;
+      grab = at(event) - m.to * m.track;
     };
     handle.onpointermove = (event) => {
       if (grab === undefined) return;
       // A release the line never heard of, such as outside the window after
       // the capture was lost, lets go here instead.
       if (!(event.buttons & 1)) return release();
-      let wanted = event.clientX - grab;
-      if (closed) {
+      const { track } = m;
+      let wanted = at(event) - grab;
+      if (m.closed) {
         // Pushed past the edge, a closed side stays there, so it opens as
         // soon as the pointer turns back.
         const past =
-          closed < 0 ? Math.min(wanted, 0) : Math.max(wanted - track, 0);
+          m.closed < 0 ? Math.min(wanted, 0) : Math.max(wanted - track, 0);
         grab += past;
         wanted -= past;
-        if ((closed < 0 ? wanted : track - wanted) < MIN) {
-          to = wanted / track;
-          show();
+        if ((m.closed < 0 ? wanted : track - wanted) < m.min) {
+          m.to = wanted / track;
+          m.show();
           return;
         }
-        closed = 0;
+        m.closed = 0;
       }
-      const preview = ease(wanted);
-      const code = ease(track - wanted);
-      closed = preview ? (code ? 0 : 1) : -1;
-      if (closed) {
+      const preview = m.ease(wanted);
+      const code = m.ease(track - wanted);
+      m.closed = preview ? (code ? 0 : 1) : -1;
+      if (m.closed) {
         // It closes with a spring, and opens again from where the pointer is.
-        jump(closed < 0 ? 0 : 1);
-        grab = event.clientX - to * track;
-      } else to = (preview === wanted ? track - code : preview) / track;
-      show();
+        m.jump(m.closed < 0 ? 0 : 1);
+        grab = at(event) - m.to * track;
+      } else m.to = (preview === wanted ? track - code : preview) / track;
+      m.show();
     };
     const release = () => {
       if (grab === undefined) return;
       grab = undefined;
-      // A side let go short of `MIN` goes to it, unless it was closed and is
-      // still short of where it would close, when it closes again.
-      const preview = to * track;
+      // A side let go short of its minimum goes to it, unless it was closed
+      // and is still short of where it would close, when it closes again.
+      const { min, track } = m;
+      const preview = m.to * track;
       const side = Math.min(preview, track - preview);
-      if (closed && side < MIN - CLOSE) jump(closed < 0 ? 0 : 1);
-      else if (side < MIN) {
-        closed = 0;
-        jump((preview < MIN ? MIN : track - MIN) / track);
+      if (m.closed && side < min / 2) m.jump(m.closed < 0 ? 0 : 1);
+      else if (side < min) {
+        m.closed = 0;
+        m.jump((preview < min ? min : track - min) / track);
       }
     };
     handle.onpointerup =
       handle.onpointercancel =
       handle.onlostpointercapture =
         release;
-    // A double click springs back to halves, opening a closed side.
+    // A double click springs back, opening a closed side.
     handle.ondblclick = () => {
-      closed = 0;
-      jump(0.5);
+      if (pick() === down && !('stack' in root.dataset)) return;
+      m.closed = 0;
+      m.jump(m.home);
     };
-    return () => cancelAnimationFrame(frameId);
+    return () => {
+      across.stop();
+      down.stop();
+      rest?.disconnect();
+    };
   }, []);
   return <div ref={line} className="cc-split" aria-hidden />;
 }

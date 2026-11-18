@@ -201,6 +201,107 @@
   }
 }
 
+/*
+ * Stacked, the line shares the height once it is first dragged: the frame
+ * keeps the height its sides had, `--stack` inside its padding, and the
+ * preview takes `--share` of it, the gap closing with either side as it does
+ * across. Until then each side takes the height it needs, and the line sits at
+ * `--rest`, where the preview ends.
+ */
+.cc {
+  --share: 0.5;
+  --seam-y: 2px;
+  --edge-y: var(--rest, 0px);
+}
+
+.cc[data-stack] {
+  --seam-y: min(
+    2px,
+    var(--share) * var(--stack),
+    (1 - var(--share)) * var(--stack)
+  );
+  --edge-y: calc(2px + var(--share) * (var(--stack) - var(--seam-y)));
+}
+
+@container (width < 640px) {
+  .cc[data-stack] > .cc-frame {
+    height: calc(var(--stack) + 4px);
+    grid-template-rows:
+      calc(var(--share) * (100% - var(--seam-y)))
+      minmax(0, 1fr);
+    row-gap: var(--seam-y);
+  }
+
+  /* The preview clips what it holds, and the code scrolls its lines. */
+  .cc[data-stack] .cc-preview {
+    min-height: 0;
+    overflow: clip;
+  }
+
+  .cc[data-stack] .cc-code {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-top: 0;
+    clip-path: inset(-2px -2px 0 -2px);
+  }
+
+  /* Below the tab as a margin, as padding would keep the closed code open. */
+  .cc[data-stack] .cc-body {
+    flex-grow: 1;
+    min-height: 0;
+    margin-top: 22px;
+    overflow-y: auto;
+  }
+
+  .cc[data-stack][data-tabs='hidden'] .cc-body {
+    margin-top: 0;
+  }
+
+  /* The preview's tab goes with the preview, cut where the code starts. */
+  .cc[data-stack] > .cc-tab {
+    clip-path: inset(-1px -7px calc(26px - var(--edge-y) - var(--seam-y)) -1px);
+  }
+
+  /*
+   * The grip across the whole width, `14px` from `5px` above the middle of the
+   * gap, and the handle on its side against the code's top, in the middle. As
+   * the code closes, it moves up into the preview.
+   */
+  .cc-split {
+    display: block;
+    inset: auto 0;
+    top: calc(var(--edge-y) + var(--seam-y) / 2 - 5px);
+    width: auto;
+    height: 14px;
+    translate: 0
+      max(
+        -8px,
+        min(
+          0px,
+          (1 - var(--share)) * (var(--stack, 100vh) - var(--seam-y)) - 8px
+        )
+      );
+  }
+
+  .cc-split::before {
+    top: calc(var(--seam-y) / 2 + 4px);
+    left: calc(50% - 29.315px);
+    width: 58.63px;
+    height: 9px;
+    transform-origin: 50% 1px;
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 3 58.63 9'%3E%3Cpath d='M0 3V4A6 6 0 0 1 5.66 8A6 6 0 0 0 11.31 12H47.31A6 6 0 0 0 52.97 8A6 6 0 0 1 58.63 4V3Z'/%3E%3C/svg%3E");
+  }
+
+  .cc-split::after {
+    top: calc(var(--seam-y) / 2 + 5px);
+    left: calc(50% - 20px);
+    width: 40px;
+    height: 4px;
+    transform-origin: 50% 0;
+  }
+}
+
 /* The component on the frame's surface, a tab's height down. */
 .cc-preview {
   display: grid;
