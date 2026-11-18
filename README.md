@@ -45,7 +45,7 @@ with `pnpm build`.
 every change, for an app that links to this checkout.
 
 Both entries, `@fabiocv/component-code` and `@fabiocv/component-code/html`, must
-stay under 22 kB minified, each counted with the chunk they share. The build
+stay under 23 kB minified, each counted with the chunk they share. The build
 fails past that and writes their sizes to `dist/size.json`, which the website
 shows.
 

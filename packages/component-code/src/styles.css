@@ -92,8 +92,9 @@
 
 /*
  * A `4px` by `40px` bar in the middle of the grip, on hover and while pressed,
- * cut into the code by a ring of the frame. It grows in from `0.8` on a spring
- * that overshoots a little.
+ * cut into the code by a `4px` ring of the frame. It grows in from `0.8` on a
+ * spring that overshoots a little, and to `1.1` on the same spring when
+ * pressed.
  */
 .cc-split::before {
   content: '';
@@ -101,13 +102,17 @@
   inset: calc(50% - 20px) 3px;
   border-radius: 2px;
   background: var(--cc-disabled);
-  box-shadow: 0 0 0 2px var(--cc-surface);
+  box-shadow: 0 0 0 4px var(--cc-surface);
   transition: 0.4s linear(0, 0.48, 1, 1.13, 1.06, 1, 0.98, 1);
 }
 
 .cc-split:not(:hover, :active)::before {
   opacity: 0;
   scale: 0.8;
+}
+
+.cc-split:active::before {
+  scale: 1.1;
 }
 
 /*
