@@ -86,22 +86,28 @@
   touch-action: none;
 }
 
-.cc-split[data-drag] {
+.cc-split:active {
   cursor: grabbing;
 }
 
-/* A `4px` by `32px` bar in the middle of the grip, on hover and while dragged. */
+/*
+ * A `4px` by `32px` bar in the middle of the grip, on hover and while pressed,
+ * cut into the code by a ring of the frame. It grows in from `0.8` on a spring
+ * that overshoots a little.
+ */
 .cc-split::before {
   content: '';
   position: absolute;
   inset: calc(50% - 16px) 3px;
   border-radius: 2px;
   background: var(--cc-disabled);
-  transition: opacity var(--cc-ease);
+  box-shadow: 0 0 0 2px var(--cc-surface);
+  transition: 0.4s linear(0, 0.48, 1, 1.13, 1.06, 1, 0.98, 1);
 }
 
-.cc-split:not(:hover, [data-drag])::before {
+.cc-split:not(:hover, :active)::before {
   opacity: 0;
+  scale: 0.8;
 }
 
 /*
