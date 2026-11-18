@@ -262,7 +262,7 @@ export function Gallery({
               strokeLinejoin="round"
               aria-hidden
             >
-              <path d="M15.5 10h-11M8.5 6 4.5 10l4 4" />
+              <path d="M12 5 7 10l5 5" />
             </svg>
             Back
           </button>

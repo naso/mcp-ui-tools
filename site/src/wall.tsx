@@ -884,7 +884,7 @@ export function Wall({
           <Tooltip.Provider>
             <div className="bar bar-right">{stencils}</div>
           </Tooltip.Provider>
-          {/* Save and View gallery, in the middle of the room the credit leaves. */}
+          {/* Save and View gallery, centred, and the credit at the right end. */}
           <div className="bar-row">
             <div className="bar bar-bottom">{keep}</div>
             {credit && (
