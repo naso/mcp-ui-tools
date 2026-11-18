@@ -1995,7 +1995,7 @@ footer a:hover {
   scale: 0.96;
 }
 
-.save form {
+.save-row {
   display: flex;
   gap: 2px;
 }

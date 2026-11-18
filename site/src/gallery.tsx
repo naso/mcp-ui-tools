@@ -1,6 +1,5 @@
 import { Popover } from '@base-ui/react/popover';
 import { useEffect, useRef, useState } from 'react';
-import type { FormEvent } from 'react';
 
 import { LONGEST_NAME } from './drawings';
 import type { Drawing } from './drawings';
@@ -35,7 +34,9 @@ const UNSAVED = "It didn't save. Try again.";
 
 /**
  * Save's popup, above its button: a field for the painter's name, and the
- * button that sends the wall to the gallery as `picture` draws it.
+ * button that sends the wall to the gallery as `picture` draws it. Not a
+ * form: X plays the wall in a frame that blocks forms from submitting, so
+ * Save and Enter send it themselves.
  */
 export function SavePopup({
   picture,
@@ -49,8 +50,7 @@ export function SavePopup({
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string>();
 
-  const submit = async (event: FormEvent) => {
-    event.preventDefault();
+  const submit = async () => {
     const given = name.trim();
     if (!given || sending) return;
     setSending(true);
@@ -78,7 +78,7 @@ export function SavePopup({
     <Popover.Portal>
       <Popover.Positioner side="top" sideOffset={8} className="tip-place">
         <Popover.Popup className="save" initialFocus={field}>
-          <form onSubmit={submit}>
+          <div className="save-row">
             <input
               ref={field}
               name="name"
@@ -92,15 +92,22 @@ export function SavePopup({
                 setName(event.target.value);
                 remember(event.target.value);
               }}
+              onKeyDown={(event) => {
+                if (event.key !== 'Enter' || event.nativeEvent.isComposing)
+                  return;
+                event.preventDefault();
+                submit();
+              }}
             />
             <button
-              type="submit"
+              type="button"
               className="pick"
               disabled={sending || !name.trim()}
+              onClick={submit}
             >
               {sending ? 'Saving…' : 'Save'}
             </button>
-          </form>
+          </div>
           {error && (
             <p className="save-error" role="alert">
               {error}
