@@ -3,6 +3,23 @@
 Every package shares a version. Each release opens with a line on what it
 brings, then lists what changed in each package.
 
+## 0.2.2 – 2026-11-18
+
+Draggable panels for the preview and its code.
+
+### @fabiocv/component-code
+
+- Drag the line between the preview and its code to resize them, or to close
+  either one.
+
+### @fabiocv/component-code-mcp
+
+- The same panels, in the chat.
+
+### mcp-ui-tools
+
+- The same panels, in the chat.
+
 ## 0.2.1 – 2026-11-17
 
 Install steps for Codex, and a way in when an app can't find `npx`.
