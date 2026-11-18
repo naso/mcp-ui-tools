@@ -67,10 +67,25 @@ const TOOLS: { id: Tool; name: string; key: string; icon: ReactNode }[] = [
   },
 ];
 
-/** Save and View gallery, along the compact wall's bottom, before their names. */
-const SAVE = icon(
-  // An arrow up out of a tray.
-  <path d="M10 12.5v-8M6.75 7.5 10 4.25l3.25 3.25M4.5 12v2.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V12" />,
+/** Save and Gallery, along the compact wall's bottom, before their names. */
+const SAVE = (
+  // A floppy disk, its label and its shutter: drawn on 16 units, so its line
+  // is 1.2 of them to be as thick as the other icons'.
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 16 16"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden
+  >
+    <path d="M4.25 2.25 L10.75 2.25 L13.75 5.25 L13.75 11.75 C13.75 12.855 12.855 13.75 11.75 13.75 L4.25 13.75 C3.145 13.75 2.25 12.855 2.25 11.75 L2.25 4.25 C2.25 3.145 3.145 2.25 4.25 2.25 Z" />
+    <path d="M4.75 13.75 L4.75 10.3 C4.75 9.858 5.108 9.5 5.55 9.5 L10.45 9.5 C10.892 9.5 11.25 9.858 11.25 10.3 L11.25 13.75" />
+    <path d="M5 2.25 L5 4.45 C5 4.892 5.358 5.25 5.8 5.25 L8.95 5.25 C9.392 5.25 9.75 4.892 9.75 4.45 L9.75 2.25" />
+  </svg>
 );
 const GALLERY = icon(
   // Four pictures in a grid.
@@ -695,7 +710,7 @@ export function Wall({
     </div>
   );
 
-  /** Save, with the popup that asks for a name, and View gallery. */
+  /** Save, with the popup that asks for a name, and Gallery. */
   const keep = (
     <>
       <Popover.Root open={saving} onOpenChange={setSaving}>
@@ -723,7 +738,7 @@ export function Wall({
         onClick={() => setShowing(true)}
       >
         {GALLERY}
-        View gallery
+        Gallery
       </button>
     </>
   );
@@ -891,7 +906,7 @@ export function Wall({
           <Tooltip.Provider>
             <div className="bar bar-right">{stencils}</div>
           </Tooltip.Provider>
-          {/* Save and View gallery, centred, and the credit at the right end. */}
+          {/* Save and Gallery, centred, and the credit at the right end. */}
           <div className="bar-row">
             <div className="bar bar-bottom">{keep}</div>
             {credit && (

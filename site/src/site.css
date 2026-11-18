@@ -1819,7 +1819,7 @@ footer a:hover {
  * The compact wall, for a small frame such as a post on X: the wall takes the
  * whole frame, and the kit floats over its sides in small bars: the tools and
  * caps on the left, with the cans beside them while spraying, the stencils on
- * the right, and Save and View gallery along the bottom.
+ * the right, and Save and Gallery along the bottom.
  */
 .wall[data-compact] {
   container-type: size;
@@ -1904,7 +1904,7 @@ footer a:hover {
 }
 
 /*
- * The bottom row: Save and View gallery, centred on the wall, and the credit
+ * The bottom row: Save and Gallery, centred on the wall, and the credit
  * at its right end. On a wall too narrow for both, the bar moves left only as
  * far as the credit needs.
  */
@@ -1943,7 +1943,7 @@ footer a:hover {
 }
 
 /*
- * On a narrower wall, the credit takes two lines, so Save and View gallery
+ * On a narrower wall, the credit takes two lines, so Save and Gallery
  * stay centred beside it.
  */
 @container (max-width: 479px) {
