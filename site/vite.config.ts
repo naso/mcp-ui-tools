@@ -16,5 +16,7 @@ export default defineConfig({
       ),
     },
   },
+  // The gallery's API, from the Worker that `pnpm --filter site api` runs.
+  server: { proxy: { '/api': 'http://localhost:8787' } },
   plugins: [react()],
 });

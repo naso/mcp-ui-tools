@@ -7,5 +7,5 @@
       "@fabiocv/component-code/html": ["../packages/component-code/src/html/index.ts"]
     }
   },
-  "include": ["src", "scripts", "*.ts"]
+  "include": ["src", "scripts", "*.ts", "../tools/core/src/env.d.ts"]
 }

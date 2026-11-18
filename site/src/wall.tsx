@@ -1,3 +1,4 @@
+import { Popover } from '@base-ui/react/popover';
 import { Tooltip } from '@base-ui/react/tooltip';
 import { useEffect, useRef, useState } from 'react';
 import type {
@@ -7,6 +8,7 @@ import type {
   ReactNode,
 } from 'react';
 
+import { Gallery, SavePopup } from './gallery';
 import { rgb } from './graffiti';
 import { ROUND, SHEET, wall } from './paint';
 import type { Place, Point } from './paint';
@@ -63,6 +65,21 @@ const TOOLS: { id: Tool; name: string; key: string; icon: ReactNode }[] = [
     ),
   },
 ];
+
+/** Save and View gallery, at the end of the compact wall's stencils. */
+const SAVE = icon(
+  // An arrow up out of a tray.
+  <path d="M10 12.5v-8M6.75 7.5 10 4.25l3.25 3.25M4.5 12v2.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V12" />,
+);
+const GALLERY = icon(
+  // Four pictures in a grid.
+  <>
+    <rect x="4" y="4" width="5" height="5" rx="1" />
+    <rect x="11" y="4" width="5" height="5" rx="1" />
+    <rect x="4" y="11" width="5" height="5" rx="1" />
+    <rect x="11" y="11" width="5" height="5" rx="1" />
+  </>,
+);
 
 /** The caps, by how wide a line each sprays, in pixels. */
 const CAPS = [
@@ -174,6 +191,10 @@ export function Wall({
   const [sheets, setSheets] = useState<Placed[]>([]);
   /** The sheet in hand. */
   const [held, setHeld] = useState<number>();
+  /** Whether Save's popup is open, and whether the gallery is. */
+  const [saving, setSaving] = useState(false);
+  const [showing, setShowing] = useState(false);
+  const galleryButton = useRef<HTMLButtonElement>(null);
 
   /** A new sheet in the middle of the wall, a step off for each one there. */
   const put = (kind: number, angle: number, others: number): Placed => {
@@ -253,7 +274,7 @@ export function Wall({
   const keys = useRef<(event: KeyboardEvent) => void>(undefined);
   useEffect(() => {
     keys.current = (event) => {
-      if (event.metaKey || event.ctrlKey || event.altKey) return;
+      if (showing || event.metaKey || event.ctrlKey || event.altKey) return;
       if ((event.target as Element).closest?.('input, textarea')) return;
       const found = TOOLS.find(({ key }) => key === event.key.toUpperCase());
       const kind = Number(event.key) - 1;
@@ -462,6 +483,49 @@ export function Wall({
     );
   };
 
+  /**
+   * The wall as it looks, for the gallery: its paint, with the sheets still
+   * on it, at the pixels it is drawn with. WebP where the browser saves it,
+   * and JPEG where it doesn't.
+   */
+  const picture = async () => {
+    const box = face.current!;
+    const painted = box.querySelector('canvas')!;
+    const scale = painted.width / box.clientWidth;
+    const canvas = document.createElement('canvas');
+    canvas.width = painted.width;
+    canvas.height = painted.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.fillStyle = `rgb(${rgb(painted, 'var(--surface)').join(' ')})`;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(painted, 0, 0);
+    // Each sheet's shadow, as the stylesheet casts it.
+    ctx.shadowColor = 'rgb(0 0 0 / 0.2)';
+    ctx.shadowBlur = 1.5 * scale;
+    ctx.shadowOffsetY = scale;
+    for (const sheet of down) {
+      const side = SHEET * sheet.size * scale;
+      ctx.save();
+      ctx.translate(sheet.x * scale, sheet.y * scale);
+      ctx.rotate(sheet.angle);
+      ctx.drawImage(
+        canvases.current.get(sheet.id)!,
+        -side / 2,
+        -side / 2,
+        side,
+        side,
+      );
+      ctx.restore();
+    }
+    const encode = (type: string) =>
+      new Promise<Blob | null>((done) => canvas.toBlob(done, type, 0.9));
+    const webp = await encode('image/webp');
+    const image =
+      webp?.type === 'image/webp' ? webp : await encode('image/jpeg');
+    if (!image) throw new Error('The wall could not be saved as an image.');
+    return image;
+  };
+
   /** Cleans the wall, back to how it opened. */
   const reset = () => {
     paint.current!.clear();
@@ -592,6 +656,41 @@ export function Wall({
           button
         );
       })}
+    </div>
+  );
+
+  /** Save, with the popup that asks for a name, and View gallery. */
+  const keep = (
+    <div className="picks keep" role="group" aria-label="Gallery">
+      <Popover.Root open={saving} onOpenChange={setSaving}>
+        <Tip label="Save" side="top">
+          <Popover.Trigger
+            render={
+              <button type="button" className="pick" aria-label="Save">
+                {SAVE}
+              </button>
+            }
+          />
+        </Tip>
+        <SavePopup
+          picture={picture}
+          onSaved={() => {
+            setSaving(false);
+            setShowing(true);
+          }}
+        />
+      </Popover.Root>
+      <Tip label="View gallery" side="top">
+        <button
+          ref={galleryButton}
+          type="button"
+          className="pick"
+          aria-label="View gallery"
+          onClick={() => setShowing(true)}
+        >
+          {GALLERY}
+        </button>
+      </Tip>
     </div>
   );
 
@@ -741,7 +840,11 @@ export function Wall({
           {/* The stencils, in the middle of the room the credit leaves. */}
           <div className="bar-row">
             <Tooltip.Provider>
-              <div className="bar bar-bottom">{stencils}</div>
+              <div className="bar bar-bottom">
+                {stencils}
+                <hr />
+                {keep}
+              </div>
             </Tooltip.Provider>
             {credit && (
               <p className="credit">
@@ -773,6 +876,15 @@ export function Wall({
             {liftButton}
           </div>
         </div>
+      )}
+
+      {showing && (
+        <Gallery
+          onClose={() => {
+            setShowing(false);
+            galleryButton.current?.focus();
+          }}
+        />
       )}
     </div>
   );

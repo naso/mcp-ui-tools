@@ -31,6 +31,11 @@ pnpm test
 pnpm check-types
 ```
 
+The wall that plays inside a post on X saves drawings to a gallery. Its API is
+the site's Worker, `site/src/worker.ts`, with the images in R2 and the list in
+D1. `pnpm --filter site api` runs it on port 8787 with local storage, and
+`pnpm dev` sends `/api` there.
+
 `pnpm --filter mcp-ui-tools host` serves a stand-in chat host that loads each
 built view under the default security policy of MCP Apps and sends it a tool
 call: Component Code at `/` and Orbit at `/orbit.html`. Build the packages first
@@ -50,8 +55,12 @@ Every package shares a version.
 2. `pnpm build && pnpm test`
 3. `pnpm --filter @fabiocv/component-code publish` and
    `pnpm --filter "./tools/*" publish`, which skips the private core.
-4. `pnpm --filter site deploy` publishes the website and the hosted MCP Apps to
-   Cloudflare Workers.
+4. `pnpm --filter site deploy` publishes the website, the hosted MCP Apps and
+   the gallery's API to Cloudflare Workers, and brings the gallery's database
+   up to date. The first deploy makes its R2 bucket and D1 database.
+
+A drawing shows in the gallery as soon as it is saved.
+`pnpm --filter site hide <id or image URL>` takes one out of it.
 
 ## Licence
 

@@ -9,7 +9,9 @@
     "check-types": "tsc --noEmit",
     "images": "node scripts/images.js",
     "player-image": "node scripts/player.js",
-    "deploy": "pnpm --dir .. build && wrangler deploy"
+    "api": "mkdir -p dist && wrangler d1 migrations apply gallery --local && wrangler dev --port 8787",
+    "hide": "node scripts/hide.js",
+    "deploy": "pnpm --dir .. build && wrangler deploy && wrangler d1 migrations apply gallery --remote"
   },
   "devDependencies": {
     "@fabiocv/component-code": "workspace:*",

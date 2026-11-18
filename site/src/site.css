@@ -1896,25 +1896,167 @@ footer a:hover {
   margin: 0 auto;
 }
 
-.bar .pick-stencil {
+.bar .pick-stencil,
+.keep .pick {
   width: 28px;
   height: 28px;
+  padding: 0;
 }
 
 /*
  * On a narrow wall, the credit takes two lines and the stencils' buttons are
- * a little smaller, so the row still fits.
+ * a little smaller, so the row still fits. So are Save and View gallery.
  */
 @container (max-width: 359px) {
   .credit a {
     display: block;
   }
 
-  .bar .pick-stencil {
+  .bar .pick-stencil,
+  .keep .pick {
     min-width: 24px;
     width: 24px;
     height: 24px;
   }
+}
+
+/*
+ * Save's popup, above its button, as a bar of its own: the name on the
+ * page's colour, and Save, chosen already.
+ */
+.save {
+  padding: 2px;
+  border-radius: var(--corner);
+  background: var(--sunken);
+  box-shadow: 0 8px 24px light-dark(oklch(0% 0 0 / 0.08), oklch(0% 0 0 / 0.4));
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity 0.15s ease-out,
+    scale 0.2s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+.save[data-starting-style],
+.save[data-ending-style] {
+  opacity: 0;
+  scale: 0.96;
+}
+
+.save form {
+  display: flex;
+  gap: 2px;
+}
+
+.save input {
+  all: unset;
+  box-sizing: border-box;
+  width: 176px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: var(--corner-inner);
+  background: var(--surface);
+  color: var(--foreground);
+  font: 14px/20px var(--sans);
+  cursor: text;
+}
+
+.save input::placeholder {
+  color: var(--disabled);
+}
+
+.save .pick:not(:disabled) {
+  background: color-mix(in srgb, var(--muted) 28%, transparent);
+  color: var(--foreground);
+}
+
+.save-error {
+  margin: 4px 8px 2px;
+  color: var(--warning);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/*
+ * The gallery, over the whole wall: its name and the way back cut into the
+ * top corners, as the wall's are, and the drawings in a grid that scrolls.
+ */
+.gallery {
+  --ground: var(--subtle);
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: grid;
+  margin: 0;
+  background: var(--surface);
+  outline: none;
+}
+
+.gallery > .tab {
+  pointer-events: none;
+}
+
+.gallery > .tab,
+.gallery > .copy {
+  z-index: 1;
+}
+
+.gallery-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 34px 10px 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(160px, 40%), 1fr));
+  gap: 12px 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.gallery-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--corner-inner);
+  background: var(--subtle);
+  /* Its edge, as the wall's frame has, where the paper meets the page. */
+  outline: 1px solid var(--subtle);
+  outline-offset: -1px;
+}
+
+.gallery-grid span {
+  display: block;
+  margin-top: 4px;
+  padding: 0 2px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gallery-note {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin: auto;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 20px;
+  text-align: center;
+}
+
+.gallery-end {
+  flex: none;
+  height: 1px;
 }
 
 /* With too little height for a column of cans, they take two. */
