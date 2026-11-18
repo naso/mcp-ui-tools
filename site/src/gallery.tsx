@@ -8,6 +8,9 @@ import type { Drawing } from './drawings';
 /** The gallery's API, which the site's Worker answers. */
 const API = '/api/drawings';
 
+/** A drawing's image. */
+export const imageOf = (id: string) => `${API}/${id}`;
+
 /** Where the name last given is kept, to give it again next time. */
 const NAME = 'wall:name';
 
@@ -112,9 +115,16 @@ export function SavePopup({
 /**
  * The drawings saved from the wall, newest first, over the whole wall, which
  * stays as it was underneath. Each page loads as the end of the last comes
- * into view. Escape, or the corner's button, goes back to the wall.
+ * into view. A drawing opens on the wall, to go on with. The wall's name in
+ * the corner, Back, the corner's button and Escape go back to the wall.
  */
-export function Gallery({ onClose }: { onClose: () => void }) {
+export function Gallery({
+  onOpen,
+  onClose,
+}: {
+  onOpen: (drawing: Drawing) => void;
+  onClose: () => void;
+}) {
   const self = useRef<HTMLElement>(null);
   const end = useRef<HTMLDivElement>(null);
   const busy = useRef(false);
@@ -175,7 +185,14 @@ export function Gallery({ onClose }: { onClose: () => void }) {
 
   return (
     <section ref={self} className="gallery" aria-label="Gallery" tabIndex={-1}>
-      <div className="tab">Gallery</div>
+      {/* Where the gallery is: on the wall, which its name goes back to. */}
+      <nav className="tab crumbs" aria-label="Breadcrumb">
+        <button type="button" onClick={onClose}>
+          Wall
+        </button>
+        <span aria-hidden>/</span>
+        <span aria-current="page">Gallery</span>
+      </nav>
       <div className="copy">
         <button type="button" aria-label="Back to the wall" onClick={onClose}>
           <svg
@@ -195,10 +212,16 @@ export function Gallery({ onClose }: { onClose: () => void }) {
       <div className="gallery-list">
         {drawings.length > 0 && (
           <ul className="gallery-grid">
-            {drawings.map(({ id, name }) => (
-              <li key={id}>
-                <img src={`${API}/${id}`} alt={`By ${name}`} loading="lazy" />
-                <span aria-hidden>{name}</span>
+            {drawings.map((drawing) => (
+              <li key={drawing.id}>
+                <button
+                  type="button"
+                  aria-label={`Open ${drawing.name}'s drawing on the wall`}
+                  onClick={() => onOpen(drawing)}
+                >
+                  <img src={imageOf(drawing.id)} alt="" loading="lazy" />
+                </button>
+                <span aria-hidden>{drawing.name}</span>
               </li>
             ))}
           </ul>
@@ -224,6 +247,26 @@ export function Gallery({ onClose }: { onClose: () => void }) {
           </p>
         )}
         <div ref={end} className="gallery-end" />
+      </div>
+      <div className="bar-row">
+        <div className="bar bar-bottom">
+          <button type="button" className="pick pick-named" onClick={onClose}>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
+              <path d="M15.5 10h-11M8.5 6 4.5 10l4 4" />
+            </svg>
+            Back
+          </button>
+        </div>
       </div>
     </section>
   );

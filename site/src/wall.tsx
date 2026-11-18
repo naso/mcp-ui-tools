@@ -8,7 +8,8 @@ import type {
   ReactNode,
 } from 'react';
 
-import { Gallery, SavePopup } from './gallery';
+import { Gallery, imageOf, SavePopup } from './gallery';
+import type { Drawing } from './drawings';
 import { rgb } from './graffiti';
 import { ROUND, SHEET, wall } from './paint';
 import type { Place, Point } from './paint';
@@ -66,7 +67,7 @@ const TOOLS: { id: Tool; name: string; key: string; icon: ReactNode }[] = [
   },
 ];
 
-/** Save and View gallery, at the end of the compact wall's stencils. */
+/** Save and View gallery, along the compact wall's bottom, before their names. */
 const SAVE = icon(
   // An arrow up out of a tray.
   <path d="M10 12.5v-8M6.75 7.5 10 4.25l3.25 3.25M4.5 12v2.5a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1V12" />,
@@ -135,7 +136,7 @@ function Tip({
 }: {
   label: string;
   /** The side of the button it shows on. */
-  side?: 'right' | 'top';
+  side?: 'right' | 'left' | 'top';
   /** The key that does the same, shown after the name. */
   shortcut?: string;
   children: ReactElement;
@@ -162,7 +163,8 @@ type Placed = Place & { id: number; kind: number; leaving?: boolean };
  * A wall to paint. Stencils from the tray lie on it as sheets, to move, turn
  * and size. A can sprays over them, on the card and through its cuts, and a
  * finger smudges the paint. Lifting a sheet shows what it left. `compact`
- * puts the kit in small bars over the wall's sides, for a small frame.
+ * puts the kit in small bars over the wall's sides, for a small frame, with
+ * Save and the gallery, where a drawing opens back on the wall to go on with.
  */
 export function Wall({
   compact = false,
@@ -195,6 +197,8 @@ export function Wall({
   const [saving, setSaving] = useState(false);
   const [showing, setShowing] = useState(false);
   const galleryButton = useRef<HTMLButtonElement>(null);
+  /** The drawing from the gallery the wall was opened with, under its paint. */
+  const [under, setUnder] = useState<string>();
 
   /** A new sheet in the middle of the wall, a step off for each one there. */
   const put = (kind: number, angle: number, others: number): Placed => {
@@ -458,12 +462,12 @@ export function Wall({
     const sin = Math.sin(angle);
     const clamp = (value: number, least: number, most: number) =>
       Math.min(most, Math.max(least, value));
-    // The open wall: between the side bars, and above the stencils.
+    // The open wall: between the side bars, and above the bottom one.
     const wall = box.getBoundingClientRect();
     const bar = (side: string) =>
       box.parentElement!.querySelector(`.bar-${side}`)!.getBoundingClientRect();
     const { side, top, bottom } = LIFT_EDGE;
-    const left = bar('left').right - wall.left + side;
+    const left = bar('side').right - wall.left + side;
     const right = bar('right').left - wall.left - side;
     const low = bar('bottom').top - wall.top - bottom;
     // The wall sits 2px inside its frame.
@@ -498,6 +502,24 @@ export function Wall({
     const ctx = canvas.getContext('2d')!;
     ctx.fillStyle = `rgb(${rgb(painted, 'var(--surface)').join(' ')})`;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // The drawing it was opened with, covering the wall as it shows.
+    const drawn = box.querySelector<HTMLImageElement>('.wall-under');
+    if (drawn) await drawn.decode().catch(() => {});
+    if (drawn?.naturalWidth) {
+      const fit = Math.max(
+        canvas.width / drawn.naturalWidth,
+        canvas.height / drawn.naturalHeight,
+      );
+      const w = drawn.naturalWidth * fit;
+      const h = drawn.naturalHeight * fit;
+      ctx.drawImage(
+        drawn,
+        (canvas.width - w) / 2,
+        (canvas.height - h) / 2,
+        w,
+        h,
+      );
+    }
     ctx.drawImage(painted, 0, 0);
     // Each sheet's shadow, as the stylesheet casts it.
     ctx.shadowColor = 'rgb(0 0 0 / 0.2)';
@@ -529,7 +551,20 @@ export function Wall({
   /** Cleans the wall, back to how it opened. */
   const reset = () => {
     paint.current!.clear();
+    setUnder(undefined);
     open();
+  };
+
+  /**
+   * Opens a drawing from the gallery on the wall, in place of what was on it,
+   * to paint over and save as a new one.
+   */
+  const reopen = ({ id }: Drawing) => {
+    paint.current!.clear();
+    setSheets([]);
+    setHeld(undefined);
+    setUnder(imageOf(id));
+    setShowing(false);
   };
 
   const reach = tool === 'smudge' ? FINGER * 2 : CAPS[cap].width;
@@ -649,7 +684,7 @@ export function Wall({
           </button>
         );
         return compact ? (
-          <Tip key={name} label={name} shortcut={String(kind + 1)} side="top">
+          <Tip key={name} label={name} shortcut={String(kind + 1)} side="left">
             {button}
           </Tip>
         ) : (
@@ -661,17 +696,16 @@ export function Wall({
 
   /** Save, with the popup that asks for a name, and View gallery. */
   const keep = (
-    <div className="picks keep" role="group" aria-label="Gallery">
+    <>
       <Popover.Root open={saving} onOpenChange={setSaving}>
-        <Tip label="Save" side="top">
-          <Popover.Trigger
-            render={
-              <button type="button" className="pick" aria-label="Save">
-                {SAVE}
-              </button>
-            }
-          />
-        </Tip>
+        <Popover.Trigger
+          render={
+            <button type="button" className="pick pick-named">
+              {SAVE}
+              Save
+            </button>
+          }
+        />
         <SavePopup
           picture={picture}
           onSaved={() => {
@@ -680,18 +714,17 @@ export function Wall({
           }}
         />
       </Popover.Root>
-      <Tip label="View gallery" side="top">
-        <button
-          ref={galleryButton}
-          type="button"
-          className="pick"
-          aria-label="View gallery"
-          onClick={() => setShowing(true)}
-        >
-          {GALLERY}
-        </button>
-      </Tip>
-    </div>
+      <hr />
+      <button
+        ref={galleryButton}
+        type="button"
+        className="pick pick-named"
+        onClick={() => setShowing(true)}
+      >
+        {GALLERY}
+        View gallery
+      </button>
+    </>
   );
 
   const liftButton = (
@@ -734,6 +767,14 @@ export function Wall({
         onPointerMove={point}
         onPointerLeave={() => (aim.current!.hidden = true)}
       >
+        {under && (
+          <img
+            className="wall-under"
+            src={under}
+            alt=""
+            crossOrigin="anonymous"
+          />
+        )}
         <canvas />
         {/* In the order they were put down, so one in focus stays in place. */}
         {[...sheets]
@@ -828,24 +869,24 @@ export function Wall({
 
       {compact ? (
         <>
-          {/* Moving from one to the next shows each name at once. */}
-          <Tooltip.Provider>
-            <div className="bar bar-left">
-              {tools}
-              <hr />
-              {caps}
-            </div>
-          </Tooltip.Provider>
-          <div className="bar bar-right">{cans}</div>
-          {/* The stencils, in the middle of the room the credit leaves. */}
-          <div className="bar-row">
+          {/* The tools and caps, and the cans beside them while spraying. */}
+          <div className="bar-side">
+            {/* Moving from one to the next shows each name at once. */}
             <Tooltip.Provider>
-              <div className="bar bar-bottom">
-                {stencils}
+              <div className="bar bar-left">
+                {tools}
                 <hr />
-                {keep}
+                {caps}
               </div>
             </Tooltip.Provider>
+            {tool === 'spray' && <div className="bar bar-cans">{cans}</div>}
+          </div>
+          <Tooltip.Provider>
+            <div className="bar bar-right">{stencils}</div>
+          </Tooltip.Provider>
+          {/* Save and View gallery, in the middle of the room the credit leaves. */}
+          <div className="bar-row">
+            <div className="bar bar-bottom">{keep}</div>
             {credit && (
               <p className="credit">
                 <span>hallucinated by</span>{' '}
@@ -880,6 +921,7 @@ export function Wall({
 
       {showing && (
         <Gallery
+          onOpen={reopen}
           onClose={() => {
             setShowing(false);
             galleryButton.current?.focus();

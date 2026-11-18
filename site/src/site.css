@@ -1457,6 +1457,16 @@ footer a:hover {
   }
 }
 
+/* A drawing from the gallery the wall was opened with, under its paint. */
+.wall-under {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
 .wall-face > canvas {
   position: absolute;
   inset: 0;
@@ -1752,7 +1762,7 @@ footer a:hover {
 
 .can[aria-pressed='true'],
 .can[data-picked] {
-  outline: 2px solid var(--foreground);
+  outline: 1px solid var(--foreground);
   outline-offset: 2px;
 }
 
@@ -1804,8 +1814,9 @@ footer a:hover {
 
 /*
  * The compact wall, for a small frame such as a post on X: the wall takes the
- * whole frame, and the kit floats over its sides in small bars, the tools and
- * caps on the left, the cans on the right and the stencils along the bottom.
+ * whole frame, and the kit floats over its sides in small bars: the tools and
+ * caps on the left, with the cans beside them while spraying, the stencils on
+ * the right, and Save and View gallery along the bottom.
  */
 .wall[data-compact] {
   container-type: size;
@@ -1842,16 +1853,22 @@ footer a:hover {
   background: var(--disabled);
 }
 
-/* Centred in the room between the wall's name and the stencils. */
-.bar-left,
+/* Centred in the room between the wall's name and the bottom bar. */
+.bar-side,
 .bar-right {
   top: calc(50% - 16px);
   translate: 0 -50%;
+}
+
+.bar-left,
+.bar-cans,
+.bar-right {
   flex-direction: column;
 }
 
 .bar-left .picks,
-.bar-right .cans {
+.bar-cans .cans,
+.bar-right .picks {
   flex-direction: column;
   align-items: stretch;
 }
@@ -1863,8 +1880,20 @@ footer a:hover {
   align-self: center;
 }
 
-.bar-left {
+/* The tools and caps, and the cans beside them, each in its own bar. */
+.bar-side {
+  position: absolute;
+  z-index: 1;
   left: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.bar-side > .bar {
+  position: static;
+  pointer-events: auto;
 }
 
 .bar-right {
@@ -1872,8 +1901,8 @@ footer a:hover {
 }
 
 /*
- * The bottom row: the stencils, in the middle of the room the credit leaves
- * at its right end.
+ * The bottom row: Save and View gallery, in the middle of the room the credit
+ * leaves at its right end.
  */
 .bar-row {
   position: absolute;
@@ -1896,27 +1925,22 @@ footer a:hover {
   margin: 0 auto;
 }
 
-.bar .pick-stencil,
-.keep .pick {
+.bar .pick-stencil {
   width: 28px;
   height: 28px;
-  padding: 0;
 }
 
-/*
- * On a narrow wall, the credit takes two lines and the stencils' buttons are
- * a little smaller, so the row still fits. So are Save and View gallery.
- */
+/* A button with its name after its icon. */
+.pick-named {
+  display: flex;
+  gap: 6px;
+  padding: 0 10px 0 6px;
+}
+
+/* On a narrow wall, the credit takes two lines, so the row still fits. */
 @container (max-width: 359px) {
   .credit a {
     display: block;
-  }
-
-  .bar .pick-stencil,
-  .keep .pick {
-    min-width: 24px;
-    width: 24px;
-    height: 24px;
   }
 }
 
@@ -1990,20 +2014,48 @@ footer a:hover {
   outline: none;
 }
 
-.gallery > .tab {
-  pointer-events: none;
-}
-
 .gallery > .tab,
 .gallery > .copy {
   z-index: 1;
+}
+
+/* Where the gallery is: after the wall's name, which goes back to it. */
+.crumbs {
+  gap: 4px;
+}
+
+.crumbs button {
+  all: unset;
+  border-radius: var(--corner-small);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+@media (hover: hover) {
+  .crumbs button:hover {
+    color: var(--foreground);
+  }
+}
+
+.crumbs button:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.crumbs [aria-hidden] {
+  color: var(--disabled);
+}
+
+.crumbs [aria-current] {
+  color: var(--foreground);
 }
 
 .gallery-list {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  padding: 34px 10px 10px;
+  /* Clear of the corners above and the bar below. */
+  padding: 34px 10px 52px;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: thin;
@@ -2028,6 +2080,27 @@ footer a:hover {
   /* Its edge, as the wall's frame has, where the paper meets the page. */
   outline: 1px solid var(--subtle);
   outline-offset: -1px;
+}
+
+/* A drawing, which opens on the wall. Its edge darkens under the pointer. */
+.gallery-grid button {
+  all: unset;
+  display: block;
+  width: 100%;
+  border-radius: var(--corner-inner);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) {
+  .gallery-grid button:hover img {
+    outline-color: var(--disabled);
+  }
+}
+
+.gallery-grid button:focus-visible {
+  outline: 2px solid var(--muted);
+  outline-offset: 2px;
 }
 
 .gallery-grid span {
@@ -2059,11 +2132,20 @@ footer a:hover {
   height: 1px;
 }
 
-/* With too little height for a column of cans, they take two. */
+/*
+ * With too little height for a column of cans, they take two, and the
+ * stencils' buttons are a little smaller, so their column still fits.
+ */
 @container (max-height: 359px) {
-  .bar-right .cans {
+  .bar-cans .cans {
     display: grid;
     grid-template-columns: repeat(2, auto);
+  }
+
+  .bar .pick-stencil {
+    min-width: 24px;
+    width: 24px;
+    height: 24px;
   }
 }
 
