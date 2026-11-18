@@ -5,7 +5,8 @@ import { ComponentCodeLogo, HomeLogo, OrbitLogo } from './logos';
 export const SITE = 'https://mcp-ui-tools.fabio.cv';
 export const GITHUB = 'https://github.com/naso/mcp-ui-tools';
 
-export type PageId = 'home' | 'component-code' | 'orbit' | 'brand' | 'wall';
+export type PageId =
+  'home' | 'component-code' | 'orbit' | 'brand' | 'wall' | 'wall-embed';
 
 export type Page = {
   id: PageId;
@@ -23,6 +24,8 @@ export type Page = {
   player?: { path: string; width: number; height: number };
   /** Kept out of search and the sitemap. */
   hidden?: boolean;
+  /** The page whose share image and icons it uses, when not its own. */
+  images?: PageId;
 };
 
 export const HOME: Page = {
@@ -59,26 +62,35 @@ export const TOOLS: Page[] = [
   },
 ];
 
-const BRAND_SUMMARY =
-  'The stencils and the spray paint the site is drawn with, to paint with yourself.';
-
 /** The brand, to paint with. It has the home page's logo, and no menu lists it. */
 export const BRAND: Page = {
   id: 'brand',
   name: 'Brand',
   path: '/brand/',
-  summary: BRAND_SUMMARY,
+  summary:
+    'The stencils and the spray paint the site is drawn with, to paint with yourself.',
   Logo: HomeLogo,
   icon: '/favicon.svg',
-  player: { path: '/brand/wall/', width: 600, height: 800 },
 };
 
-/** The wall alone, filling its frame, for X to show inside a post. */
+/** The wall, sized to play inside a post on X, with its tools at its sides. */
 export const WALL: Page = {
   id: 'wall',
   name: 'Wall',
   path: '/brand/wall/',
-  summary: BRAND_SUMMARY,
+  summary: 'A wall to spray and smudge, right inside a post on X.',
+  Logo: HomeLogo,
+  icon: '/favicon.svg',
+  images: 'brand',
+  player: { path: '/brand/wall/embed/', width: 600, height: 600 },
+};
+
+/** The wall alone, filling its frame, for X to play inside a post. */
+export const WALL_EMBED: Page = {
+  id: 'wall-embed',
+  name: 'Wall',
+  path: '/brand/wall/embed/',
+  summary: WALL.summary,
   Logo: HomeLogo,
   icon: '/favicon.svg',
   hidden: true,
@@ -87,7 +99,8 @@ export const WALL: Page = {
 /** The pages the menu lists: the home page and each tool. */
 export const MENU = [HOME, ...TOOLS];
 
-export const PAGES = [...MENU, WALL, BRAND];
+// The longer paths first, so `pageAt` finds them before the ones they're in.
+export const PAGES = [...MENU, WALL_EMBED, WALL, BRAND];
 
 /** The page at a path, or home. */
 export const pageAt = (path: string) =>

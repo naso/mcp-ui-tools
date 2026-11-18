@@ -3,7 +3,7 @@ import { ComponentCodePage } from './component-code';
 import { HomePage } from './home';
 import { OrbitPage } from './orbit';
 import type { PageId } from './pages';
-import { WallPage } from './wall';
+import { WallEmbed, WallPage } from './wall';
 
 const PAGES = {
   home: HomePage,
@@ -11,6 +11,7 @@ const PAGES = {
   orbit: OrbitPage,
   brand: BrandPage,
   wall: WallPage,
+  'wall-embed': WallEmbed,
 } satisfies Record<PageId, () => unknown>;
 
 export function App({ page }: { page: PageId }) {

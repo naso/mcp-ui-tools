@@ -4,6 +4,8 @@ import type { CSSProperties, PointerEvent as Press } from 'react';
 import { rgb } from './graffiti';
 import { ROUND, SHEET, wall } from './paint';
 import type { Place, Point } from './paint';
+import { WALL } from './pages';
+import { Shell } from './shell';
 import { cutOf, STENCILS } from './stencils';
 
 type Tool = 'move' | 'spray' | 'smudge';
@@ -59,9 +61,10 @@ type Placed = Place & { id: number; kind: number; leaving?: boolean };
 /**
  * A wall to paint. Stencils from the tray lie on it as sheets, to move, turn
  * and size. A can sprays over them, on the card and through its cuts, and a
- * finger smudges the paint. Lifting a sheet shows what it left.
+ * finger smudges the paint. Lifting a sheet shows what it left. `compact`
+ * puts the kit in small bars over the wall's sides, for a small frame.
  */
-export function Wall() {
+export function Wall({ compact = false }: { compact?: boolean }) {
   const face = useRef<HTMLDivElement>(null);
   const tray = useRef<HTMLDivElement>(null);
   const aim = useRef<HTMLDivElement>(null);
@@ -316,8 +319,110 @@ export function Wall() {
 
   const reach = tool === 'smudge' ? FINGER * 2 : CAPS[cap].width;
 
+  const tools = (
+    <div className="picks" role="group" aria-label="Tool">
+      {TOOLS.map(({ id, name }) => (
+        <button
+          key={id}
+          type="button"
+          className="pick"
+          aria-pressed={tool === id}
+          onClick={() => setTool(id)}
+        >
+          {name}
+        </button>
+      ))}
+    </div>
+  );
+
+  const caps = (
+    <div className="picks" role="group" aria-label="Cap">
+      {CAPS.map(({ name }, index) => (
+        <button
+          key={name}
+          type="button"
+          className="pick"
+          aria-label={`${name} cap`}
+          aria-pressed={cap === index}
+          onClick={() => {
+            setCap(index);
+            setTool('spray');
+          }}
+        >
+          <span
+            className="dot"
+            style={{ '--dot': `${4 + index * 5}px` } as CSSProperties}
+          />
+        </button>
+      ))}
+    </div>
+  );
+
+  const cans = (
+    <div className="cans" role="group" aria-label="Colour">
+      {CANS.map(({ name, color }, index) => (
+        <button
+          key={name}
+          type="button"
+          className="can"
+          aria-label={name}
+          aria-pressed={can === index}
+          style={{ '--paint': color } as CSSProperties}
+          onClick={() => {
+            setCan(index);
+            setTool('spray');
+          }}
+        />
+      ))}
+      {/* A can of any colour, from the system's picker. */}
+      <label
+        className="can can-own"
+        data-picked={can === CANS.length || undefined}
+        style={own ? ({ '--paint': own } as CSSProperties) : undefined}
+      >
+        <input
+          type="color"
+          aria-label="Your own colour"
+          value={own ?? OWN}
+          onChange={(event) => {
+            setOwn(event.target.value);
+            setCan(CANS.length);
+            setTool('spray');
+          }}
+        />
+      </label>
+    </div>
+  );
+
+  const stencils = (
+    <div className="picks" ref={tray} role="group" aria-label="Stencils">
+      {STENCILS.map(({ name, Shape }, kind) => (
+        <button
+          key={name}
+          type="button"
+          className="pick pick-stencil"
+          aria-label={`Put the ${name} stencil on the wall`}
+          onClick={() => add(kind)}
+        >
+          <Shape size={compact ? 20 : 28} />
+        </button>
+      ))}
+    </div>
+  );
+
+  const liftButton = (
+    <button
+      type="button"
+      className="pick lift"
+      disabled={!next}
+      onClick={() => lift(next!.id)}
+    >
+      Lift
+    </button>
+  );
+
   return (
-    <div className="wall">
+    <div className="wall" data-compact={compact || undefined}>
       <div className="tab">Wall</div>
       <div className="copy">
         <button type="button" aria-label="Start over" onClick={reset}>
@@ -426,119 +531,63 @@ export function Wall() {
         />
       </div>
 
-      <div className="kit">
-        <div>
-          <div className="label">Tool</div>
-          <div className="picks" role="group" aria-label="Tool">
-            {TOOLS.map(({ id, name }) => (
-              <button
-                key={id}
-                type="button"
-                className="pick"
-                aria-pressed={tool === id}
-                onClick={() => setTool(id)}
-              >
-                {name}
-              </button>
-            ))}
+      {compact ? (
+        <>
+          <div className="bar bar-left">
+            {tools}
+            <hr />
+            {caps}
+          </div>
+          <div className="bar bar-right">{cans}</div>
+          <div className="bar bar-bottom">
+            {stencils}
+            <hr />
+            {liftButton}
+          </div>
+        </>
+      ) : (
+        <div className="kit">
+          <div>
+            <div className="label">Tool</div>
+            {tools}
+          </div>
+          <div>
+            <div className="label">Cap</div>
+            {caps}
+          </div>
+          <div>
+            <div className="label">Colour</div>
+            {cans}
+          </div>
+          <div className="kit-stencils">
+            <div className="label">Stencils</div>
+            {stencils}
+            {liftButton}
           </div>
         </div>
-
-        <div>
-          <div className="label">Cap</div>
-          <div className="picks" role="group" aria-label="Cap">
-            {CAPS.map(({ name }, index) => (
-              <button
-                key={name}
-                type="button"
-                className="pick"
-                aria-label={`${name} cap`}
-                aria-pressed={cap === index}
-                onClick={() => {
-                  setCap(index);
-                  setTool('spray');
-                }}
-              >
-                <span
-                  className="dot"
-                  style={{ '--dot': `${4 + index * 5}px` } as CSSProperties}
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <div className="label">Colour</div>
-          <div className="cans" role="group" aria-label="Colour">
-            {CANS.map(({ name, color }, index) => (
-              <button
-                key={name}
-                type="button"
-                className="can"
-                aria-label={name}
-                aria-pressed={can === index}
-                style={{ '--paint': color } as CSSProperties}
-                onClick={() => {
-                  setCan(index);
-                  setTool('spray');
-                }}
-              />
-            ))}
-            {/* A can of any colour, from the system's picker. */}
-            <label
-              className="can can-own"
-              data-picked={can === CANS.length || undefined}
-              style={own ? ({ '--paint': own } as CSSProperties) : undefined}
-            >
-              <input
-                type="color"
-                aria-label="Your own colour"
-                value={own ?? OWN}
-                onChange={(event) => {
-                  setOwn(event.target.value);
-                  setCan(CANS.length);
-                  setTool('spray');
-                }}
-              />
-            </label>
-          </div>
-        </div>
-
-        <div className="kit-stencils">
-          <div className="label">Stencils</div>
-          <div className="picks" ref={tray} role="group" aria-label="Stencils">
-            {STENCILS.map(({ name, Shape }, kind) => (
-              <button
-                key={name}
-                type="button"
-                className="pick pick-stencil"
-                aria-label={`Put the ${name} stencil on the wall`}
-                onClick={() => add(kind)}
-              >
-                <Shape size={28} />
-              </button>
-            ))}
-          </div>
-          <button
-            type="button"
-            className="pick lift"
-            disabled={!next}
-            onClick={() => lift(next!.id)}
-          >
-            Lift
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }
 
-/** The wall alone, filling the page, for X to play inside a post. */
+/** The wall as it plays inside a post on X, at the card's size. */
 export function WallPage() {
   return (
+    <Shell page={WALL} links={[]} npm="mcp-ui-tools">
+      <div className="hero">
+        <div className="wall-card">
+          <Wall compact />
+        </div>
+      </div>
+    </Shell>
+  );
+}
+
+/** The wall alone, filling the page, for X to play inside a post. */
+export function WallEmbed() {
+  return (
     <main className="player">
-      <Wall />
+      <Wall compact />
     </main>
   );
 }

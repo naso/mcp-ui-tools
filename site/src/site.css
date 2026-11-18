@@ -1803,8 +1803,102 @@ footer a:hover {
 }
 
 /*
+ * The compact wall, for a small frame such as a post on X: the wall takes the
+ * whole frame, and the kit floats over its sides in small bars, the tools and
+ * caps on the left, the cans on the right and the stencils along the bottom.
+ */
+.wall[data-compact] {
+  container-type: size;
+  height: 100%;
+  grid-template-rows: 1fr;
+}
+
+.wall[data-compact] .wall-face {
+  height: auto;
+}
+
+.bar {
+  position: absolute;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: var(--corner);
+  background: var(--sunken);
+}
+
+.bar .picks,
+.bar .cans {
+  flex-wrap: nowrap;
+}
+
+.bar hr {
+  flex: none;
+  margin: 0 2px;
+  width: 1px;
+  height: 16px;
+  border: 0;
+  background: var(--disabled);
+}
+
+/* Centred in the room between the wall's name and the stencils. */
+.bar-left,
+.bar-right {
+  top: calc(50% - 16px);
+  translate: 0 -50%;
+  flex-direction: column;
+}
+
+.bar-left .picks,
+.bar-right .cans {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.bar-left hr {
+  margin: 2px 0;
+  width: 16px;
+  height: 1px;
+  align-self: center;
+}
+
+.bar-left {
+  left: 10px;
+}
+
+.bar-right {
+  right: 10px;
+}
+
+.bar-bottom {
+  bottom: 10px;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.bar .pick-stencil {
+  width: 28px;
+  height: 28px;
+}
+
+/* With too little height for a column of cans, they take two. */
+@container (max-height: 359px) {
+  .bar-right .cans {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+  }
+}
+
+/* The wall page shows the card at the size X gives it on a wide screen. */
+.wall-card {
+  max-width: 600px;
+  aspect-ratio: 1;
+}
+
+/*
  * The wall alone, as X plays it inside a post: it fills the frame X gives it,
- * the wall taking what the kit leaves, and the page never scrolls.
+ * and the page never scrolls.
  */
 html:has(.player) {
   overflow: hidden;
@@ -1818,12 +1912,6 @@ html:has(.player) {
 }
 
 .player .wall {
-  grid-template-rows: 1fr auto;
   border-radius: 0;
   outline: none;
-}
-
-.player .wall-face {
-  height: auto;
-  min-height: 160px;
 }
