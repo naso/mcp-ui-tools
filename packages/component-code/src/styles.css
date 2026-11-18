@@ -75,13 +75,21 @@
   background: var(--cc-surface);
 }
 
-/* The line's grip, `10px` across the gap, from the top to the bottom. */
+/*
+ * The line's grip, from `5px` before the middle of the gap to the end of the
+ * handle in the code, from the top to the bottom. As the code closes, it moves
+ * back into the preview by as much of the handle as the code no longer holds.
+ */
 .cc-split {
   position: absolute;
   inset: 0 auto;
   left: calc(var(--edge) + var(--seam) / 2 - 5px);
   display: none;
-  width: 10px;
+  width: 18px;
+  translate: max(
+    -12px,
+    min(0px, (1 - var(--split)) * (100cqw - 4px - var(--seam)) - 12px)
+  );
   cursor: grab;
   touch-action: none;
 }
@@ -91,11 +99,10 @@
 }
 
 /*
- * A `4px` by `40px` bar in the middle of the grip, on hover and while pressed,
- * cut into the code by a `4px` ring of the frame, both with round ends, and
- * the ring meets the sides on `6px` fillets. Both grow in from `0.8` about the
- * same middle on a spring that overshoots a little, and to `1.1` on the same
- * spring when pressed.
+ * The handle, on hover and while pressed: a `4px` by `40px` bar in an indent
+ * `12px` into the code, `4px` around it, which meets the code's edge on `6px`
+ * fillets. Both grow from the code's edge, from `0.8` on a spring that
+ * overshoots a little, and to `1.1` on the same spring when pressed.
  */
 .cc-split::before,
 .cc-split::after {
@@ -105,21 +112,23 @@
   transition-property: opacity, scale;
 }
 
-/*
- * The ring, `12px` by `48px`, with its fillets `3.75px` over each end. They
- * meet the code `1px` past the ring's middle, where the gap ends. With a side
- * closed the bar sits on the code's edge instead, so the ring moves `1px` back.
- */
+/* The indent, from `1px` inside the gap, so no edge shows between them. */
 .cc-split::before {
-  translate: calc(var(--seam) / 2 - 1px);
-  inset: calc(50% - 27.745px) -1px;
+  top: calc(50% - 30px);
+  left: calc(var(--seam) / 2 + 4px);
+  width: 13px;
+  height: 60px;
+  transform-origin: 1px;
   background: var(--cc-surface);
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 55.49'%3E%3Cpath d='M7 0A6 6 0 0 0 9.5 4.87A6 6 0 0 1 12 9.75V45.75A6 6 0 0 1 9.5 50.62A6 6 0 0 0 7 55.49H5A6 6 0 0 0 2.5 50.62A6 6 0 0 1 0 45.75V9.75A6 6 0 0 1 2.5 4.87A6 6 0 0 0 5 0Z'/%3E%3C/svg%3E")
-    0 0 / 100% 100%;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-1 0 13 60'%3E%3Cpath d='M-1 0H0A6 6 0 0 0 6 6A6 6 0 0 1 12 12V48A6 6 0 0 1 6 54A6 6 0 0 0 0 60H-1Z'/%3E%3C/svg%3E");
 }
 
 .cc-split::after {
-  inset: calc(50% - 20px) 3px;
+  top: calc(50% - 20px);
+  left: calc(var(--seam) / 2 + 9px);
+  width: 4px;
+  height: 40px;
+  transform-origin: -4px;
   border-radius: 2px;
   background: var(--cc-disabled);
 }
