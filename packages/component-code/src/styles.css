@@ -85,10 +85,10 @@
   inset: 0 auto;
   left: calc(var(--edge) + var(--seam) / 2 - 5px);
   display: none;
-  width: 18px;
+  width: 14px;
   translate: max(
-    -12px,
-    min(0px, (1 - var(--split)) * (100cqw - 4px - var(--seam)) - 12px)
+    -8px,
+    min(0px, (1 - var(--split)) * (100cqw - 4px - var(--seam)) - 8px)
   );
   cursor: grab;
   touch-action: none;
@@ -99,8 +99,8 @@
 }
 
 /*
- * The handle, on hover and while pressed: a `4px` by `40px` bar in an indent
- * `12px` into the code, `4px` around it, which meets the code's edge on `6px`
+ * The handle, on hover and while pressed: a `4px` by `40px` bar against the
+ * code's edge, in an indent `4px` around it, which meets the edge on `6px`
  * fillets. Both grow from the code's edge, from `0.8` on a spring that
  * overshoots a little, and to `1.1` on the same spring when pressed.
  */
@@ -114,21 +114,21 @@
 
 /* The indent, from `1px` inside the gap, so no edge shows between them. */
 .cc-split::before {
-  top: calc(50% - 30px);
+  top: calc(50% - 29.315px);
   left: calc(var(--seam) / 2 + 4px);
-  width: 13px;
-  height: 60px;
+  width: 9px;
+  height: 58.63px;
   transform-origin: 1px;
   background: var(--cc-surface);
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-1 0 13 60'%3E%3Cpath d='M-1 0H0A6 6 0 0 0 6 6A6 6 0 0 1 12 12V48A6 6 0 0 1 6 54A6 6 0 0 0 0 60H-1Z'/%3E%3C/svg%3E");
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='3 0 9 58.63'%3E%3Cpath d='M3 0H4A6 6 0 0 0 8 5.66A6 6 0 0 1 12 11.31V47.31A6 6 0 0 1 8 52.97A6 6 0 0 0 4 58.63H3Z'/%3E%3C/svg%3E");
 }
 
 .cc-split::after {
   top: calc(50% - 20px);
-  left: calc(var(--seam) / 2 + 9px);
+  left: calc(var(--seam) / 2 + 5px);
   width: 4px;
   height: 40px;
-  transform-origin: -4px;
+  transform-origin: 0;
   border-radius: 2px;
   background: var(--cc-disabled);
 }
