@@ -1572,9 +1572,12 @@ footer a:hover {
   }
 }
 
+/* Darker on a dark wall, where a faint one would vanish, as the tips' are. */
 @keyframes sheet-rise {
   to {
-    filter: drop-shadow(0 16px 12px oklch(0% 0 0 / 0.22));
+    filter: drop-shadow(
+      0 16px 12px light-dark(oklch(0% 0 0 / 0.22), oklch(0% 0 0 / 0.6))
+    );
   }
 }
 
