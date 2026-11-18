@@ -131,6 +131,8 @@ export function Gallery({
   const [drawings, setDrawings] = useState<Drawing[]>([]);
   /** The cursor to the next page, or null at the last. */
   const [next, setNext] = useState<string | null>(null);
+  /** How many drawings the gallery has, once the first page says. */
+  const [count, setCount] = useState<number>();
   const [state, setState] = useState<'loading' | 'ready' | 'failed'>('loading');
 
   /** A page of drawings: the first, or the one from before `before`. */
@@ -143,12 +145,16 @@ export function Gallery({
         before ? `${API}?before=${encodeURIComponent(before)}` : API,
       );
       if (!response.ok) throw new Error();
-      const page: { drawings: Drawing[]; next: string | null } =
-        await response.json();
+      const page: {
+        drawings: Drawing[];
+        next: string | null;
+        count?: number;
+      } = await response.json();
       setDrawings((list) =>
         before ? [...list, ...page.drawings] : page.drawings,
       );
       setNext(page.next);
+      if (page.count !== undefined) setCount(page.count);
       setState('ready');
     } catch {
       setState('failed');
@@ -191,7 +197,12 @@ export function Gallery({
           Wall
         </button>
         <span aria-hidden>/</span>
-        <span aria-current="page">Gallery</span>
+        <span aria-current="page">
+          Gallery{' '}
+          {count !== undefined && (
+            <span className="tab-count">{count.toLocaleString('en')}</span>
+          )}
+        </span>
       </nav>
       <div className="copy">
         <button type="button" aria-label="Back to the wall" onClick={onClose}>

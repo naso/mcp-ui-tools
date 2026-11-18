@@ -2,7 +2,8 @@
  * The drawings saved from the wall on X: each image in R2, and its name and
  * when it was saved in D1, for the gallery to list, newest first.
  *
- *   GET  /api/drawings              a page of them, and the cursor to the next
+ *   GET  /api/drawings              a page of them, the cursor to the next, and
+ *                                   on the first, how many there are
  *   POST /api/drawings              a form with `image` and `name`
  *   GET  /api/drawings/<id>         the image
  *
@@ -89,7 +90,10 @@ export const clean = (name: unknown) =>
     .join('')
     .trim();
 
-/** A page of drawings, newest first, from before `before` when it's given. */
+/**
+ * A page of drawings, newest first, from before `before` when it's given.
+ * The first page also says how many the gallery has.
+ */
 async function list(url: URL, env: Env) {
   const before = url.searchParams.get('before');
   const [created, id] = before?.split('.') ?? [];
@@ -109,9 +113,17 @@ async function list(url: URL, env: Env) {
   ).all<Drawing>();
   const drawings = results.slice(0, PAGE);
   const last = drawings.at(-1);
+  const count = before
+    ? undefined
+    : (
+        await env.DB.prepare(
+          'SELECT COUNT(*) AS count FROM drawings WHERE hidden = 0',
+        ).first<{ count: number }>()
+      )?.count;
   return json({
     drawings,
     next: results.length > PAGE && last ? `${last.created}.${last.id}` : null,
+    count,
   });
 }
 
