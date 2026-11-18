@@ -2182,11 +2182,16 @@ footer a:hover {
   font-size: 12px;
 }
 
-/* Who made it, at the bottom row's right end. Only the name is a link. */
+/*
+ * Who made it, at the bottom row's right end, its last line on the bar's
+ * bottom edge: 4px of its 16px line is below the text. Only the name is a
+ * link.
+ */
 .credit {
   grid-column: 3;
+  align-self: end;
   justify-self: end;
-  margin: 0;
+  margin: 0 0 -4px;
   color: var(--disabled);
   font-size: 12px;
   line-height: 16px;
