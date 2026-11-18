@@ -131,7 +131,7 @@ const LARGEST = 8;
 const CARD = 'var(--subtle)';
 
 /** How long a sheet takes to lift off, as the stylesheet has it, in ms. */
-const LIFT = 200;
+const LIFT = 300;
 
 /**
  * How near Lift's middle may come to the bars beside and below it, and to the
