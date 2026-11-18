@@ -82,8 +82,25 @@
   left: calc(var(--edge) + var(--seam) / 2 - 5px);
   display: none;
   width: 10px;
-  cursor: col-resize;
+  cursor: grab;
   touch-action: none;
+}
+
+.cc-split[data-dragging] {
+  cursor: grabbing;
+}
+
+/* A rounded bar in the middle of the grip, showing where it is. */
+.cc-split::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 4px;
+  height: 32px;
+  margin-top: -16px;
+  border-radius: 2px;
+  background: var(--cc-disabled);
 }
 
 /*
