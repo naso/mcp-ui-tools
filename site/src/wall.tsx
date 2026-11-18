@@ -820,7 +820,11 @@ export function Wall({
                     zIndex: sheets.indexOf(sheet) + 1,
                     width: side,
                     height: side,
-                    transform: `translate(${sheet.x - side / 2}px, ${sheet.y - side / 2}px) rotate(${sheet.angle}rad)`,
+                    // As properties of their own, not a transform, so the
+                    // `scale` it is laid down and lifted with is about its
+                    // middle, wherever it lies.
+                    translate: `${sheet.x - side / 2}px ${sheet.y - side / 2}px`,
+                    rotate: `${sheet.angle}rad`,
                   } as CSSProperties
                 }
                 onPointerDown={(event) => grab(event, sheet, 'move')}
