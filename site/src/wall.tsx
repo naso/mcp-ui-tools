@@ -57,12 +57,9 @@ const TOOLS: { id: Tool; name: string; icon: ReactNode }[] = [
   {
     id: 'smudge',
     name: 'Smudge',
-    // A fingertip drawn through a line of paint.
+    // A hand, its finger out to smudge with.
     icon: icon(
-      <>
-        <path d="M3 14c2.5-2 4.5-2 7 0s4.5 2 7 0" />
-        <path d="M8 10.5V5a1.5 1.5 0 0 1 3 0v5.5" />
-      </>,
+      <path d="M7.5 11V4a1.5 1.5 0 0 1 3 0v5.5M10.5 9.5V9a1.5 1.5 0 0 1 3 0v1M13.5 10a1.5 1.5 0 0 1 3 0v2.5a5 5 0 0 1-5 5h-1a4.5 4.5 0 0 1-3.4-1.6l-2.7-3.3a1.4 1.4 0 0 1 2.1-1.9l1 1" />,
     ),
   },
 ];
