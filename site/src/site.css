@@ -1530,19 +1530,8 @@ footer a:hover {
   animation: sheet-down 0.3s cubic-bezier(0.2, 0.9, 0.3, 1);
 }
 
-/*
- * Lifted off, it rises toward the eye from its middle, tilting to the right,
- * seen from far enough that it hardly distorts, and fades once it has left
- * the wall. Its shadow falls further and softer as it rises.
- */
 .sheet[data-leaving] {
-  animation:
-    sheet-up 0.3s cubic-bezier(0.2, 0.9, 0.3, 1) forwards,
-    sheet-gone 0.3s ease-out forwards;
-}
-
-.sheet[data-leaving] canvas {
-  animation: sheet-rise 0.3s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+  animation: sheet-up 0.2s ease-out forwards;
 }
 
 @keyframes sheet-down {
@@ -1553,31 +1542,15 @@ footer a:hover {
 }
 
 @keyframes sheet-up {
-  from {
-    transform: perspective(1200px) translateZ(0) rotateY(0);
-  }
-
-  to {
-    transform: perspective(1200px) translateZ(48px) rotateY(16deg);
-  }
-}
-
-@keyframes sheet-gone {
-  40% {
-    opacity: 1;
-  }
-
   to {
     opacity: 0;
+    scale: 1.05;
   }
 }
 
-/* Darker on a dark wall, where a faint one would vanish, as the tips' are. */
-@keyframes sheet-rise {
+@keyframes sheet-fade {
   to {
-    filter: drop-shadow(
-      0 16px 12px light-dark(oklch(0% 0 0 / 0.22), oklch(0% 0 0 / 0.6))
-    );
+    opacity: 0;
   }
 }
 
@@ -1588,11 +1561,7 @@ footer a:hover {
   }
 
   .sheet[data-leaving] {
-    animation: sheet-gone 0.3s ease-out forwards;
-  }
-
-  .sheet[data-leaving] canvas {
-    animation: none;
+    animation: sheet-fade 0.2s ease-out forwards;
   }
 }
 
