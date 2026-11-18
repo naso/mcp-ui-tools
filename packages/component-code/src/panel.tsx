@@ -395,7 +395,8 @@ const DAMPING = (4 * Math.PI) / 0.35;
  * `--split`, the preview's share. Past `MIN` a side resists, easing more the
  * closer it gets to the edge, and `CLOSE` past it the side closes. The line
  * follows the pointer; when a side closes or opens, or is let go while
- * resisting and goes back to `MIN`, a spring takes it from where it was.
+ * resisting and goes back to `MIN`, a spring takes it from where it was. A
+ * double click springs it back to halves.
  */
 function Split() {
   const line = useRef<HTMLDivElement>(null);
@@ -479,6 +480,11 @@ function Split() {
       if (!closed && Math.min(preview, track - preview) < MIN) {
         jump((preview < MIN ? MIN : track - MIN) / track);
       }
+    };
+    // A double click springs back to halves, opening a closed side.
+    handle.ondblclick = () => {
+      closed = 0;
+      jump(0.5);
     };
     return () => cancelAnimationFrame(frameId);
   }, []);
