@@ -90,8 +90,10 @@
   cursor: grabbing;
 }
 
-/* A rounded bar in the middle of the grip, showing where it is. */
+/* A rounded bar in the middle of the grip, shown on hover and while dragged. */
 .cc-split::before {
+  opacity: 0;
+  transition: opacity var(--cc-ease);
   content: '';
   position: absolute;
   top: 50%;
@@ -101,6 +103,11 @@
   margin-top: -16px;
   border-radius: 2px;
   background: var(--cc-disabled);
+}
+
+.cc-split:hover::before,
+.cc-split[data-dragging]::before {
+  opacity: 1;
 }
 
 /*
