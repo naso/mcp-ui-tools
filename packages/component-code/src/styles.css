@@ -166,9 +166,24 @@
     clip-path: inset(-2px 0 0 -2px);
   }
 
+  /*
+   * Cut where the code starts, keeping the fillet at its top, as a quarter
+   * circle in six steps, so a cut tab still meets the frame's edge round.
+   */
   .cc > .cc-tab {
-    clip-path: inset(
-      -1px calc(100% + 2px - var(--edge) - var(--seam)) -6px -1px
+    --cut: calc(var(--edge) + var(--seam) - 2px);
+    clip-path: polygon(
+      -1px -1px,
+      calc(var(--cut) + 6px) -1px,
+      calc(var(--cut) + 6px) 0,
+      calc(var(--cut) + 4.45px) 0.2px,
+      calc(var(--cut) + 3px) 0.8px,
+      calc(var(--cut) + 1.76px) 1.76px,
+      calc(var(--cut) + 0.8px) 3px,
+      calc(var(--cut) + 0.2px) 4.45px,
+      var(--cut) 6px,
+      var(--cut) calc(100% + 6px),
+      -1px calc(100% + 6px)
     );
   }
 
