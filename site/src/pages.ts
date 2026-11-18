@@ -71,6 +71,8 @@ export const BRAND: Page = {
     'The stencils and the spray paint the site is drawn with, to paint with yourself.',
   Logo: HomeLogo,
   icon: '/favicon.svg',
+  // Shared on X, it plays the compact wall inside the post.
+  player: { path: '/brand/wall/embed/', width: 600, height: 600 },
 };
 
 /** The wall, sized to play inside a post on X, with its tools at its sides. */
@@ -82,7 +84,6 @@ export const WALL: Page = {
   Logo: HomeLogo,
   icon: '/favicon.svg',
   images: 'brand',
-  player: { path: '/brand/wall/embed/', width: 600, height: 600 },
 };
 
 /** The wall alone, filling its frame, for X to play inside a post. */
