@@ -27,6 +27,8 @@ function card({ player }: Page) {
     `<meta name="twitter:player" content="${SITE}${player.path}" />`,
     `<meta name="twitter:player:width" content="${player.width}" />`,
     `<meta name="twitter:player:height" content="${player.height}" />`,
+    `<meta name="twitter:title" content="${escape(player.title)}" />`,
+    `<meta name="twitter:description" content="${escape(player.description)}" />`,
   ];
 }
 
@@ -50,13 +52,13 @@ export function render() {
           `<meta property="og:title" content="${escape(page.name)}" />`,
           `<meta property="og:description" content="${escape(page.summary)}" />`,
           `<meta property="og:url" content="${SITE}${page.path}" />`,
-          `<meta property="og:image" content="${SITE}/og/${page.images ?? page.id}.png" />`,
+          `<meta property="og:image" content="${SITE}/og/${page.id}.png" />`,
           `<meta property="og:image:width" content="${OG.width}" />`,
           `<meta property="og:image:height" content="${OG.height}" />`,
           `<meta property="og:image:alt" content="${escape(`${page.name}: ${page.summary}`)}" />`,
           `<link rel="canonical" href="${SITE}${page.path}" />`,
           `<link rel="icon" href="${page.icon}" type="image/svg+xml" />`,
-          `<link rel="apple-touch-icon" href="/icons/${page.images ?? page.id}-180.png" />`,
+          `<link rel="apple-touch-icon" href="/icons/${page.id}-180.png" />`,
           ...card(page),
         ]
     ).join('\n    '),

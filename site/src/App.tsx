@@ -3,14 +3,13 @@ import { ComponentCodePage } from './component-code';
 import { HomePage } from './home';
 import { OrbitPage } from './orbit';
 import type { PageId } from './pages';
-import { WallEmbed, WallPage } from './wall';
+import { WallEmbed } from './wall';
 
 const PAGES = {
   home: HomePage,
   'component-code': ComponentCodePage,
   orbit: OrbitPage,
   brand: BrandPage,
-  wall: WallPage,
   'wall-embed': WallEmbed,
 } satisfies Record<PageId, () => unknown>;
 

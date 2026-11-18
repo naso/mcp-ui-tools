@@ -10,8 +10,6 @@ import type {
 import { rgb } from './graffiti';
 import { ROUND, SHEET, wall } from './paint';
 import type { Place, Point } from './paint';
-import { WALL } from './pages';
-import { Shell } from './shell';
 import { cutOf, STENCILS } from './stencils';
 
 type Tool = 'move' | 'spray' | 'smudge';
@@ -149,7 +147,14 @@ type Placed = Place & { id: number; kind: number; leaving?: boolean };
  * finger smudges the paint. Lifting a sheet shows what it left. `compact`
  * puts the kit in small bars over the wall's sides, for a small frame.
  */
-export function Wall({ compact = false }: { compact?: boolean }) {
+export function Wall({
+  compact = false,
+  credit = false,
+}: {
+  compact?: boolean;
+  /** Who made it, after its name, for where it plays away from the site. */
+  credit?: boolean;
+}) {
   const face = useRef<HTMLDivElement>(null);
   const tray = useRef<HTMLDivElement>(null);
   const aim = useRef<HTMLDivElement>(null);
@@ -604,6 +609,14 @@ export function Wall({ compact = false }: { compact?: boolean }) {
   return (
     <div className="wall" data-compact={compact || undefined}>
       <div className="tab">Wall</div>
+      {credit && (
+        <p className="credit">
+          hallucinated by{' '}
+          <a href="https://x.com/naso" target="_blank">
+            Fabio
+          </a>
+        </p>
+      )}
       <div className="copy">
         <button type="button" aria-label="Start over" onClick={reset}>
           <svg
@@ -762,24 +775,11 @@ export function Wall({ compact = false }: { compact?: boolean }) {
   );
 }
 
-/** The wall as it plays inside a post on X, at the card's size. */
-export function WallPage() {
-  return (
-    <Shell page={WALL} links={[]} npm="mcp-ui-tools">
-      <div className="hero">
-        <div className="wall-card">
-          <Wall compact />
-        </div>
-      </div>
-    </Shell>
-  );
-}
-
 /** The wall alone, filling the page, for X to play inside a post. */
 export function WallEmbed() {
   return (
     <main className="player">
-      <Wall compact />
+      <Wall compact credit />
     </main>
   );
 }

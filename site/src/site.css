@@ -1903,6 +1903,34 @@ footer a:hover {
   font-size: 12px;
 }
 
+/*
+ * Who made it, in the bottom right corner, just above the stencils' row so it
+ * fits beside them on a phone too. Only the name is a link.
+ */
+.credit {
+  position: absolute;
+  z-index: 1;
+  right: 12px;
+  bottom: 50px;
+  margin: 0;
+  color: var(--disabled);
+  font-size: 12px;
+  line-height: 16px;
+  pointer-events: none;
+}
+
+.credit a {
+  color: var(--muted);
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+@media (hover: hover) {
+  .credit a:hover {
+    color: var(--foreground);
+  }
+}
+
 /* The left bar is as thin as its icons. */
 .bar-left .pick {
   width: 28px;
@@ -1947,12 +1975,6 @@ footer a:hover {
 /* Moving between buttons, the name changes without fading. */
 .tip[data-instant] {
   transition: none;
-}
-
-/* The wall page shows the card at the size X gives it on a wide screen. */
-.wall-card {
-  max-width: 600px;
-  aspect-ratio: 1;
 }
 
 /*
