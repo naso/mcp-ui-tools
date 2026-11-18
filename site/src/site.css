@@ -1169,8 +1169,8 @@ td:first-child {
   all: unset;
   box-sizing: border-box;
   display: grid;
-  /* The gist starts at 198px, in line with Manually beside the install button. */
-  grid-template-columns: 80px 86px 1fr auto;
+  /* Version, date and gist each 16px apart, the gist starting at 134px. */
+  grid-template-columns: 32px 70px 1fr auto;
   align-items: baseline;
   gap: 16px;
   width: 100%;
@@ -1183,6 +1183,7 @@ td:first-child {
 .release-version {
   color: var(--foreground);
   font-weight: 500;
+  font-variant-numeric: tabular-nums;
 }
 
 .release-date,
@@ -1211,7 +1212,7 @@ td:first-child {
 
 .release-panel {
   /* Lines its packages and bullets up with the gist. */
-  padding-left: 198px;
+  padding-left: 134px;
 }
 
 /* Closed, it is hidden until found but still laid out, so it takes room only
