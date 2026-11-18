@@ -3,6 +3,30 @@
 Every package shares a version. Each release opens with a line on what it
 brings, then lists what changed in each package.
 
+## 0.3.0 – 2026-11-18
+
+A handle on the line between the preview and its code.
+
+### @fabiocv/component-code
+
+- Hovering the line shows its handle: a bar in an indent cut into the code,
+  which springs in, grows a little when pressed, and grabs.
+- With the code closed, the handle moves into the preview, so it stays in
+  reach.
+- A Preview tab cut short by a narrow preview keeps its rounded corner.
+- A drag lets go however the button is released, and only the main button
+  drags.
+- `pnpm --filter @fabiocv/component-code dev` rebuilds on every change, for
+  linking the package from a local checkout.
+
+### @fabiocv/component-code-mcp
+
+- The same handle, in the chat.
+
+### mcp-ui-tools
+
+- The same handle, in the chat.
+
 ## 0.2.2 – 2026-11-18
 
 Draggable panels for the preview and its code.

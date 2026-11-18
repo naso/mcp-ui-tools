@@ -1,6 +1,6 @@
 {
   "name": "@fabiocv/mcp-ui-tools-core",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "private": true,
   "description": "What the mcp-ui-tools packages share. Each bundles it, so it is not published.",
   "license": "MIT",
