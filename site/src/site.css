@@ -1891,14 +1891,13 @@ footer a:hover {
 }
 
 /*
- * Lift, inside the sheet in hand along its bottom edge, upright however the
- * sheet is turned, on the bars' colour.
+ * Lift, beside the turning handle of the sheet in hand, on the bars' colour,
+ * and over the sheets, so it is always in view.
  */
 .sheet-lift {
   position: absolute;
-  bottom: 8px;
-  left: 50%;
-  translate: -50% 0;
+  z-index: 2;
+  translate: -50% -50%;
   height: 24px;
   background: var(--sunken);
   font-size: 12px;

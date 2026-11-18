@@ -102,6 +102,12 @@ const CARD = 'var(--subtle)';
 /** How long a sheet takes to lift off, as the stylesheet has it, in ms. */
 const LIFT = 200;
 
+/**
+ * How near Lift's middle may come to the bars beside and below it, and to the
+ * wall's top, where its name and Start over are.
+ */
+const LIFT_EDGE = { side: 26, top: 40, bottom: 16 };
+
 /** The most pixels the wall is drawn with, however sharp the screen. */
 const MOST = 1.8e6;
 
@@ -409,6 +415,38 @@ export function Wall({ compact = false }: { compact?: boolean }) {
   const down = sheets.filter(({ leaving }) => !leaving);
   const next = down.find(({ id }) => id === held) ?? down.at(-1);
 
+  /**
+   * On the compact wall, where Lift goes for the sheet in hand: beside its
+   * turning handle, turned with it, and kept in the open wall between the
+   * bars, however near an edge the sheet lies. In the wall's own pixels.
+   */
+  const holding = tool === 'move' && down.find(({ id }) => id === held);
+  const liftAt = ((): Point | undefined => {
+    const box = face.current;
+    if (!compact || !holding || !box) return;
+    const { x, y, angle, size } = holding;
+    // The handle is 24px above the sheet's top edge; Lift is 34px to its right.
+    const along = 34;
+    const up = -(SHEET * size) / 2 - 24;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+    const clamp = (value: number, least: number, most: number) =>
+      Math.min(most, Math.max(least, value));
+    // The open wall: between the side bars, and above the stencils.
+    const wall = box.getBoundingClientRect();
+    const bar = (side: string) =>
+      box.parentElement!.querySelector(`.bar-${side}`)!.getBoundingClientRect();
+    const { side, top, bottom } = LIFT_EDGE;
+    const left = bar('left').right - wall.left + side;
+    const right = bar('right').left - wall.left - side;
+    const low = bar('bottom').top - wall.top - bottom;
+    // The wall sits 2px inside its frame.
+    return [
+      clamp(x + along * cos - up * sin, left, right) + 2,
+      clamp(y + along * sin + up * cos, top, low) + 2,
+    ];
+  })();
+
   /** Lifts a sheet off the wall, and takes the next one down in hand. */
   const lift = (id: number) => {
     change(id, { leaving: true });
@@ -660,18 +698,6 @@ export function Wall({ compact = false }: { compact?: boolean }) {
                       className="grip grip-turn"
                       onPointerDown={(event) => grab(event, sheet, 'turn')}
                     />
-                    {/* On the compact wall, Lift is on the sheet in hand. */}
-                    {compact && (
-                      <button
-                        type="button"
-                        className="pick sheet-lift"
-                        style={{ rotate: `${-sheet.angle}rad` }}
-                        onPointerDown={(event) => event.stopPropagation()}
-                        onClick={() => lift(sheet.id)}
-                      >
-                        Lift
-                      </button>
-                    )}
                   </>
                 )}
               </div>
@@ -684,6 +710,17 @@ export function Wall({ compact = false }: { compact?: boolean }) {
           hidden
         />
       </div>
+
+      {compact && liftAt && (
+        <button
+          type="button"
+          className="pick sheet-lift"
+          style={{ left: liftAt[0], top: liftAt[1] }}
+          onClick={() => lift(held!)}
+        >
+          Lift
+        </button>
+      )}
 
       {compact ? (
         <>
