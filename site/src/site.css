@@ -1531,9 +1531,9 @@ footer a:hover {
 }
 
 /*
- * Lifted off, it rises toward the eye from its middle, tilting as a hand pulls
- * it by its lower right corner, and fades once it has left the wall. Its
- * shadow falls further and softer as it rises.
+ * Lifted off, it rises toward the eye from its middle, tilting to the right,
+ * seen from far enough that it hardly distorts, and fades once it has left
+ * the wall. Its shadow falls further and softer as it rises.
  */
 .sheet[data-leaving] {
   animation:
@@ -1554,12 +1554,11 @@ footer a:hover {
 
 @keyframes sheet-up {
   from {
-    transform: perspective(600px) translateZ(0) rotateX(0) rotateY(0);
+    transform: perspective(1200px) translateZ(0) rotateY(0);
   }
 
   to {
-    transform: perspective(600px) translateZ(40px) rotateX(22deg)
-      rotateY(-12deg);
+    transform: perspective(1200px) translateZ(48px) rotateY(16deg);
   }
 }
 
