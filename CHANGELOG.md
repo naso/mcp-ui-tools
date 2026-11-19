@@ -3,6 +3,30 @@
 Every package shares a version. Each release opens with a line on what it
 brings, then lists what changed in each package.
 
+## 0.4.0 – 2026-11-19
+
+A title for the preview, hidden tabs, a side closed or shown alone, and a line
+to drag when the two are stacked.
+
+### @fabiocv/component-code
+
+- `title` names the preview's tab, which is `Preview` without it.
+- `tabs={false}` hides the tabs.
+- `collapsed="preview"` or `collapsed="code"` starts that side closed, and
+  dragging the line opens it.
+- `only="preview"` or `only="code"` shows that side alone, without the line.
+- Each works the same in `@fabiocv/component-code/html`.
+- Stacked on a narrow page, the line between the preview and its code can be
+  dragged too, and shares their height between them.
+
+### @fabiocv/component-code-mcp
+
+- The same line to drag when stacked, in the chat.
+
+### mcp-ui-tools
+
+- The same line to drag when stacked, in the chat.
+
 ## 0.3.0 – 2026-11-18
 
 A handle on the line between the preview and its code.

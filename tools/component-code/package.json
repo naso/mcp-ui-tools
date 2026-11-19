@@ -1,6 +1,6 @@
 {
   "name": "@fabiocv/component-code-mcp",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Component Code as an MCP App: a React component shown in the chat beside the code that uses it, with every value a control.",
   "keywords": [
     "mcp",
